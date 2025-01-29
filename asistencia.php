@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 include_once('app/func.inc.php');
-
+//aaaaaaa
 include_once('plantillas/DecInc.inc.php');
 ?>
 <div class="container-fluid px-3 py-4">
