@@ -1,7 +1,5 @@
 <?php
 
-
-
 if ($_SERVER['HTTP_HOST'] === 'localhost') {
     class Database
     {
