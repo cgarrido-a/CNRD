@@ -33,5 +33,3 @@ if (file_exists('plantillas/DecFin.inc.php')) {
     die('Error: No se encuentra el archivo DecFin.inc.php.');
 }
 ?>
-
-?>

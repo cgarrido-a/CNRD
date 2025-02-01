@@ -61,32 +61,31 @@ class Voluntario
     public function cambiar_estado($estado) { return $this->estado = $estado; }
     public function cambiar_telefono($telefono) { return $this->telefono = $telefono; }
     public function cambiar_correo($correo) { return $this->correo = $correo; }
-    
-    public function obtener_id() { return $this->id; }
-    public function obtener_nombre() { return $this->nombre; }
-    public function obtener_rut() { return $this->rut; }
-    public function obtener_telefono() { return $this->telefono; }
-    public function obtener_correo() { return $this->correo; }
-    public function obtener_profesion() { return $this->profesion; }
-    public function obtener_region() { return $this->region; }
-    public function obtener_comuna() { return $this->comuna; }
-    public function obtener_experiencia_voluntario() { return $this->experiencia_voluntario; }
-    public function obtener_experiencia_otra_emergencia() { return $this->experiencia_otra_emergencia; }
-    public function obtener_recursos_propios() { return $this->recursos_propios; }
-    public function obtener_hobbies() { return $this->hobbies; }
-    public function obtener_tipo_alimentacion() { return $this->tipo_alimentacion; }
-    public function obtener_grupo_sanguineo() { return $this->grupo_sanguineo; }
-    public function obtener_enfermedades_cronicas() { return $this->enfermedades_cronicas; }
-    public function obtener_actividades() { return $this->actividades; }
-    public function obtener_area_desempeno() { return $this->area_desempeno; }
-    public function obtener_experiencia_emergencias() { return $this->experiencia_emergencias; }
-    public function obtener_experiencia_animales() { return $this->experiencia_animales; }
-    public function obtener_experiencia_desastres() { return $this->experiencia_desastres; }
-    public function obtener_certificado_titulo() { return $this->certificado_titulo; }
-    public function obtener_estado() { return $this->estado; }
-    public function obtener_fecha_registro() { return $this->fecha_registro; }
-    public function obtener_fotoperfil() { return $this->fotoperfil; }
-    public function obtener_certificado_antecedentes() { return $this->certificado_antecedentes; }
+    public function obtener_id(){ return $this->id; }
+    public function obtener_nombre(){ return $this->nombre; }
+    public function obtener_rut(){ return $this->rut; }
+    public function obtener_telefono(){ return $this->telefono; }
+    public function obtener_correo(){ return $this->correo; }
+    public function obtener_profesion(){ return $this->profesion; }
+    public function obtener_region(){ return $this->region; }
+    public function obtener_comuna(){ return $this->comuna; }
+    public function obtener_experiencia_voluntario(){ return $this->experiencia_voluntario; }
+    public function obtener_experiencia_otra_emergencia(){ return $this->experiencia_otra_emergencia; }
+    public function obtener_recursos_propios(){ return $this->recursos_propios; }
+    public function obtener_hobbies(){ return $this->hobbies; }
+    public function obtener_tipo_alimentacion(){ return $this->tipo_alimentacion; }
+    public function obtener_grupo_sanguineo(){ return $this->grupo_sanguineo; }
+    public function obtener_enfermedades_cronicas(){ return $this->enfermedades_cronicas; }
+    public function obtener_actividades(){ return $this->actividades; }
+    public function obtener_area_desempeno(){ return $this->area_desempeno; }
+    public function obtener_experiencia_emergencias(){ return $this->experiencia_emergencias; }
+    public function obtener_experiencia_animales(){ return $this->experiencia_animales; }
+    public function obtener_experiencia_desastres(){ return $this->experiencia_desastres; }
+    public function obtener_certificado_titulo(){ return $this->certificado_titulo; }
+    public function obtener_estado(){ return $this->estado; }
+    public function obtener_fecha_registro(){ return $this->fecha_registro; }
+    public function obtener_fotoperfil(){ return $this->fotoperfil; }
+    public function obtener_certificado_antecedentes(){ return $this->certificado_antecedentes; }
 }
 
 class Ubicaciones

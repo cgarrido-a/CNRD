@@ -1,7 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+
 include_once('conex.inc.php');
 include_once('class.inc.php');
 class Clinicas
@@ -180,7 +178,12 @@ class Usuario
     {
         switch ($type) {
             case 'voluntario':
-                $query = "SELECT * FROM voluntarios WHERE correo = :email";
+                $query = "SELECT v.ID, v.clave, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS 
+                            nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
+                            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
+                            v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
+                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes 
+                            FROM voluntarios v JOIN regiones r ON v.id_region = r.ID WHERE v.correo = :email";
                 break;
             case 'Coordinacion':
                 $query = "SELECT * FROM usuarios WHERE correo = :email";
@@ -212,7 +215,7 @@ class Usuario
             }
 
             // Si es un voluntario, verificar si está habilitado
-            if ($type === 'voluntario' && ($user['estado'] === 'rechazado' || $user['estado'] === 'deshabilitado')) {
+            if ($type === 'voluntario' && ($user['Estado'] === 'rechazado' || $user['Estado'] === 'deshabilitado')) {
                 session_unset(); // Limpiar las variables de sesión
                 session_destroy(); // Destruir la sesión
                 return ['error' => 'Este voluntario está deshabilitado'];
@@ -223,37 +226,37 @@ class Usuario
             if (!empty($user)) {
                 switch ($type) {
                     case 'voluntario':
-                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['user_id'] = $user['ID'];
                         $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
-                        $_SESSION['user_email'] = htmlspecialchars($user['correo']);
+                        $_SESSION['user_email'] = htmlspecialchars($user['Correo']);
                         $_SESSION['user_type'] = $type;
 
-                        $_SESSION['UserLog'] = new Voluntario(
-                            htmlspecialchars($user['id']),
+                        $_SESSION['UserLog'] =new Voluntario(
+                            htmlspecialchars($user['ID']),
                             htmlspecialchars($user['nombre']),
-                            htmlspecialchars($user['rut']),
-                            htmlspecialchars($user['telefono']),
-                            htmlspecialchars($user['correo']),
-                            htmlspecialchars($user['profesion']),
-                            htmlspecialchars($user['region']),
-                            htmlspecialchars($user['comuna']),
-                            htmlspecialchars($user['experiencia_voluntario']),
-                            htmlspecialchars($user['experiencia_otra_emergencia']),
-                            htmlspecialchars($user['recursos_propios']),
-                            htmlspecialchars($user['hobbies']),
-                            htmlspecialchars($user['tipo_alimentacion']),
-                            htmlspecialchars($user['grupo_sanguineo']),
-                            htmlspecialchars($user['enfermedades_cronicas']),
-                            htmlspecialchars($user['actividades']),
-                            htmlspecialchars($user['area_desempeno']),
-                            htmlspecialchars($user['experiencia_emergencias']),
-                            htmlspecialchars($user['experiencia_animales']),
-                            htmlspecialchars($user['experiencia_desastres']),
-                            htmlspecialchars($user['certificado_titulo']),
-                            htmlspecialchars($user['estado']),
-                            htmlspecialchars($user['fecha_registro']),
-                            htmlspecialchars($user['fotoperfil']),
-                            htmlspecialchars($user['certificado_antecedentes'])
+                            htmlspecialchars($user['RUT']),
+                            htmlspecialchars($user['Telefono']),
+                            htmlspecialchars($user['Correo']),
+                            htmlspecialchars($user['Profesion']),
+                            htmlspecialchars($user['nombre_region']),
+                            htmlspecialchars($user['Comuna']),
+                            htmlspecialchars($user['Experiencia_voluntario']),
+                            htmlspecialchars($user['Experiencia_otra_emergencia']),
+                            htmlspecialchars($user['Recursos_propios']),
+                            htmlspecialchars($user['Hobbys']),
+                            htmlspecialchars($user['Tipo_alimentacion']),
+                            htmlspecialchars($user['Grupo_sanguineo']),
+                            htmlspecialchars($user['Enfermedades_cronicas']),
+                            htmlspecialchars($user['Actividades']),
+                            htmlspecialchars($user['Area_desempeno']),
+                            htmlspecialchars($user['Experiencia_emergencias']),
+                            htmlspecialchars($user['Experiencia_animales']),
+                            htmlspecialchars($user['Experiencia_desastres']),
+                            $user['Certificado_titulo'],
+                            $user['Estado'],
+                            $user['Fecha_registro'],
+                            $user['Fotoperfil'],
+                            $user['CertificadoAntecedentes']
                         );
                         break;
                     case 'Coordinacion':
