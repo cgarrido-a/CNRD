@@ -2,6 +2,7 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
+include_once('app/class.inc.php');
 include_once('plantillas/DecInc.inc.php');
 
 // Validación de ID del voluntario
@@ -12,7 +13,7 @@ if (!$idVoluntario) {
 }
 
 // Obtener datos del voluntario
-$voluntario = Usuario::obtenerVoluntarioPorId($idVoluntario);
+$voluntario = Voluntarios::obtenerVoluntarioPorId($idVoluntario);
 $credencial = Usuario::get_cedusuario($idVoluntario);
 
 if (!$voluntario) {
@@ -20,7 +21,7 @@ if (!$voluntario) {
     exit;
 }
 
-$institucion = 'CNRD ' . $voluntario['region'];
+$institucion = 'CNRD ' . $voluntario->obtener_region();
 
 // Función para mostrar mensajes de error
 function mostrarError($mensaje)
@@ -46,10 +47,10 @@ function mostrarError($mensaje)
                     <h5 class="text-muted">Información Personal</h5>
                     <hr>
                     <?php generarDetalle([
-                        'Nombre Completo' => $voluntario['nombre'],
-                        'RUT' => $voluntario['rut'],
-                        'Teléfono' => $voluntario['telefono'],
-                        'Correo' => $voluntario['correo']
+                        'Nombre Completo' => $voluntario->obtener_nombre(),
+                        'RUT' => $voluntario->obtener_rut(),
+                        'Teléfono' => $voluntario->obtener_telefono(),
+                        'Correo' => $voluntario->obtener_correo()
                     ]); ?>
                     <div class="form-group mb-3">
                         <?php
@@ -62,12 +63,12 @@ function mostrarError($mensaje)
                 <div class="col-md-6">
                     <hr>
                     <?php generarDetalle([
-                        'Profesión' => $voluntario['profesion'],
-                        'Tipo de Alimentación' => $voluntario['tipo_alimentacion'],
-                        'Grupo Sanguíneo' => $voluntario['grupo_sanguineo'],
-                        'Enfermedades Crónicas' => $voluntario['enfermedades_cronicas'],
-                        'Estado' => $voluntario['estado'] ? 'Habilitado' : 'Deshabilitado',
-                        'Fecha de Registro' => $voluntario['fecha_registro']
+                        'Profesión' => $voluntario->obtener_profesion(),
+                        'Tipo de Alimentación' => $voluntario->obtener_tipo_alimentacion(),
+                        'Grupo Sanguíneo' => $voluntario->obtener_grupo_sanguineo(),
+                        'Enfermedades Crónicas' => $voluntario->obtener_enfermedades_cronicas(),
+                        'Estado' => $voluntario->obtener_estado() ? 'Habilitado' : 'Deshabilitado',
+                        'Fecha de Registro' => $voluntario->obtener_fecha_registro()
                     ]); ?>
                 </div>
             </div>
@@ -76,11 +77,11 @@ function mostrarError($mensaje)
                     <h5 class="text-muted">Historial de voluntario</h5>
                     <hr>
                     <?php generarDetalle([
-                        'Area de desempeño' => $voluntario['area_desempeno'],
-                        'Actividades' => $voluntario['actividades'],
-                        'Experencia en emergencias' => $voluntario['experiencia_emergencias'],
-                        'Experencia de trabajo con animales' => $voluntario['experiencia_animales'],
-                        'Experiencia en desastres' => $voluntario['experiencia_desastres']
+                        'Area de desempeño' => $voluntario->obtener_area_desempeno(),
+                        'Actividades' => $voluntario->obtener_actividades(),
+                        'Experencia en emergencias' => $voluntario->obtener_experiencia_emergencias(),
+                        'Experencia de trabajo con animales' => $voluntario->obtener_experiencia_animales(),
+                        'Experiencia en desastres' => $voluntario->obtener_experiencia_desastres()
                     ]); ?>
                 </div>
             </div>
@@ -90,16 +91,16 @@ function mostrarError($mensaje)
                     <h5 class="text-muted">Ubicación</h5>
                     <hr>
                     <?php generarDetalle([
-                        'Región' => $voluntario['region'],
-                        'Comuna' => $voluntario['comuna']
+                        'Región' => $voluntario->obtener_region(),
+                        'Comuna' => $voluntario->obtener_comuna()
                     ]); ?>
                 </div>
                 <div class="col-md-6">
                     <h5 class="text-muted">Hobbies y Recursos Propios</h5>
                     <hr>
                     <?php generarDetalle([
-                        'Hobbies' => $voluntario['hobbys'],
-                        'Recursos Propios' => $voluntario['recursos_propios']
+                        'Hobbies' => $voluntario->obtener_hobbies(),
+                        'Recursos Propios' => $voluntario->obtener_recursos_propios()
                     ]); ?>
                 </div>
             </div>
@@ -109,14 +110,14 @@ function mostrarError($mensaje)
                 <div class="col-md-6 text-center">
                     <h5 class="text-muted">Foto de Perfil</h5>
                     <hr>
-                    <?php generarImagen($voluntario['Fotoperfil'], 'Foto de Perfil', '#modalFotoPerfil'); ?>
+                    <?php generarImagen($voluntario->obtener_Fotoperfil(), 'Foto de Perfil', '#modalFotoPerfil'); ?>
                 </div>
                 <div class="col-md-6">
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
-                    <?php generarDocumento('Certificado de Título', $voluntario['certificado_titulo'], '#modalCertificadoTitulo'); ?>
+                    <?php generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
                     <hr>
-                    <?php generarDocumento('Certificado de Antecedentes', $voluntario['certificadoAntecedentes'], '#modalCertificadoAntecedentes'); ?>
+                    <?php generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>
             </div>
         </div>
@@ -127,7 +128,7 @@ function mostrarError($mensaje)
                 <div class="col-md-6 text-center">
                     <h5 class="text-muted">Estado y acciones</h5>
                     <hr>
-                    <h5 class="text-muted">Estado: <strong><?php echo $voluntario['estado']; ?></strong></h5>
+                    <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
                     <label for="estado">Acción</label>
                     <?php if ($voluntario['estado'] === 'habilitado') { ?>
                         <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>

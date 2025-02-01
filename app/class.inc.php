@@ -3,6 +3,7 @@
 class Voluntario
 {
     private $id;
+    private $nombre;
     private $rut;
     private $telefono;
     private $correo;
@@ -27,9 +28,10 @@ class Voluntario
     private $fotoperfil;
     private $certificado_antecedentes;
 
-    public function __construct($id, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, $certificado_antecedentes)
+    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, $certificado_antecedentes)
     {
         $this->id = $id;
+        $this->nombre = $nombre;
         $this->rut = $rut;
         $this->telefono = $telefono;
         $this->correo = $correo;
@@ -61,6 +63,7 @@ class Voluntario
     public function cambiar_correo($correo) { return $this->correo = $correo; }
     
     public function obtener_id() { return $this->id; }
+    public function obtener_nombre() { return $this->nombre; }
     public function obtener_rut() { return $this->rut; }
     public function obtener_telefono() { return $this->telefono; }
     public function obtener_correo() { return $this->correo; }

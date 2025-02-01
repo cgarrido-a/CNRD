@@ -6,10 +6,24 @@ header('Content-Type: text/html; charset=UTF-8');
 mb_internal_encoding("UTF-8");
 
 include_once('app/conex.inc.php');
+include_once('app/class.inc.php');
 include_once('app/func.inc.php');
 include_once('plantillas/DecInc.inc.php');
-$voluntarios = Usuario::obtenerVoluntarios();
-
+$voluntarios = Voluntarios::obtenerVoluntarios();
+$vols =[];
+if(count($voluntarios)){
+    foreach ($voluntarios as $voluntario) {
+        $vols[] =array(
+            "id"=> $voluntario->obtener_id(),
+            "nombre"=> $voluntario->obtener_nombre(),
+            "telefono"=> $voluntario->obtener_telefono(),
+            "region"=> $voluntario->obtener_region(),
+            "comuna"=> $voluntario->obtener_comuna(),
+            "estado"=> $voluntario->obtener_estado(),
+            "profesion"=> $voluntario->obtener_profesion(),
+        );
+    }
+} 
 ?>
 <div class="container mt-5">
     <h2>Gestión de Voluntarios</h2>
@@ -106,19 +120,19 @@ $voluntarios = Usuario::obtenerVoluntarios();
         txt.innerHTML = html;
         return txt.value;
     }
-    let voluntarios = <?php echo json_encode($voluntarios); ?>;
+    let voluntarios = <?php echo json_encode($vols); ?>;
+    console.log(voluntarios)
+    voluntarios.forEach(voluntario => {
+                    voluntario.region = decodeHTML(voluntario.region);
+                });
     <?php
-    if ($_SESSION['region'] != 'Nacional') {
+    if ($_SESSION['UserLog']->obtener_region_id() != '17') {
     ?>
-        var reg = "<?php echo $_SESSION['region']; ?>";
+        var reg = "<?php echo $_SESSION['UserLog']->obtener_region_id(); ?>";
         voluntarios = voluntarios.filter(voluntario => voluntario.region === reg && voluntario.estado === 'habilitado');
     <?php
     }
     ?>
-    voluntarios.forEach(voluntario => {
-        voluntario.region = decodeHTML(voluntario.region);
-    });
-    console.log(voluntarios)
     let currentPage = 1; // Página actual
     const rowsPerPage = 25; // Número de filas por página
 

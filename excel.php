@@ -35,7 +35,7 @@ class ExportarExcel
             ->setCellValue('F1', 'Estado');
 
         // Obtener los datos de la consulta
-        $datosJSON = Usuario::obtenerVoluntarios(); // Llama a la función existente
+        $datosJSON = Voluntarios::obtenerVoluntarios(); // Llama a la función existente
         $voluntarios = json_decode($datosJSON, true);
 
         if (!$voluntarios) {

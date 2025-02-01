@@ -3,6 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 include_once('conex.inc.php');
+include_once('class.inc.php');
 class Clinicas
 {
     public static function generarCadena($idClinica)
@@ -173,199 +174,126 @@ class Clinicas
 
 class Usuario
 {
-    public static function obtenerVoluntarioPorId($id)
+
+    //Listas modificacion clases
+    public static function login($email, $password, $type)
     {
+        switch ($type) {
+            case 'voluntario':
+                $query = "SELECT * FROM voluntarios WHERE correo = :email";
+                break;
+            case 'Coordinacion':
+                $query = "SELECT * FROM usuarios WHERE correo = :email";
+                break;
+            case 'Clinica':
+                $query = "SELECT * FROM clinicas WHERE correo = :email";
+                break;
+            default:
+                return ['error' => 'Tipo de usuario no válido'];
+        }
+
         try {
+            // Consultar la base de datos para encontrar el usuario
             $pdo = Database::connect();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT * FROM voluntarios WHERE id = :id";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':id', $id);
 
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($resultado) {
-                return $resultado;
-            } else {
-                return "";
-            }
-        } catch (PDOException $e) {
-            print 'Error: ' . $e->getMessage();
-        }
-    }
-    public static function obtenerVoluntariosConIngreso()
-    {
-        $conn =  Database::connect();
-        try {
-            // Consulta SQL
-            $sql = "
-            SELECT 
-                v.nombre AS nombre_voluntario,
-                v.tipo_alimentacion AS tipo_alimentacion,
-                c.nombre_clinica AS nombre_clinica,
-                c.region AS region_clinica,
-                c.comuna AS comuna_clinica
-            FROM 
-                voluntarios v
-            JOIN 
-                RegistroEntradasSalidas r ON v.id_voluntario = r.id_voluntario
-            JOIN 
-                clinicas c ON r.id_clinica = c.id_clinica
-            WHERE 
-                r.fecha_salida IS NULL
-        ";
-
-            // Preparar la consulta
-            $stmt = $conn->prepare($sql);
-
-            // Ejecutar la consulta
-            $stmt->execute();
-
-            // Obtener los resultados como un array asociativo
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            // Manejo de errores
-            error_log("Error en obtenerVoluntariosConIngreso: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    public static function registrarSalida($voluntarioId, $lugarId)
-    {
-        $conn =  Database::connect();
-        if ($conn === null) {
-            return "Error de conexión a la base de datos.";
-        }
-
-        $fechaActual = date('Y-m-d H:i:s'); // Fecha y hora actual
-
-        try {
-            // Verificar si hay un registro de entrada sin salida
-            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
-                         WHERE voluntario_id = :voluntario_id 
-                         AND lugar_id = :lugar_id 
-                         AND fecha_hora_salida IS NULL 
-                         ORDER BY fecha_hora_entrada DESC LIMIT 1";
-            $stmt = $conn->prepare($sqlCheck);
-            $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
-            $stmt->execute();
-
-            if ($stmt->rowCount() === 0) {
-                return "No hay un registro de entrada sin salida para este voluntario.";
+            if (!$user) {
+                return ['error' => 'Usuario no encontrado'];
             }
 
-            // Obtener el ID del registro de entrada sin salida
-            $registro = $stmt->fetch(PDO::FETCH_ASSOC);
-            $registroId = $registro['id'];
-
-            // Actualizar la fecha y hora de salida
-            $sqlUpdate = "UPDATE RegistroEntradasSalidas 
-                          SET fecha_hora_salida = :fecha_hora_salida 
-                          WHERE id = :id";
-            $stmt = $conn->prepare($sqlUpdate);
-            $stmt->bindParam(':fecha_hora_salida', $fechaActual);
-            $stmt->bindParam(':id', $registroId);
-            $stmt->execute();
-
-            return "Salida registrada exitosamente.";
-        } catch (PDOException $e) {
-            return "Error al registrar la salida: " . $e->getMessage();
-        } finally {
-            $conn = null;
-        }
-    }
-
-    public static function registrarEntrada($voluntarioId, $lugarId)
-    {
-        $conn = Database::connect();
-        if ($conn === null) {
-            return "Error de conexión a la base de datos.";
-        }
-
-        $fechaActual = date('Y-m-d H:i:s'); // Fecha y hora actual
-
-        try {
-
-            // Verificar si ya existe una entrada sin salida para este voluntario
-            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
-                         WHERE voluntario_id = :voluntario_id 
-                         AND lugar_id = :lugar_id 
-                         AND fecha_hora_salida IS NULL";
-            $stmt = $conn->prepare($sqlCheck);
-            $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
-            $stmt->execute();
-
-            if ($stmt->rowCount() > 0) {
-                return "Ya existe un registro de entrada sin salida para este voluntario.";
+            // Verificar la contraseña
+            if (!password_verify($password, $user['clave'])) {
+                return ['error' => 'Contraseña incorrecta'];
             }
 
-            // Insertar la nueva entrada
-            $sqlInsert = "INSERT INTO RegistroEntradasSalidas (voluntario_id, lugar_id, fecha_hora_entrada) 
-                          VALUES (:voluntario_id, :lugar_id, :fecha_hora_entrada)";
-            $stmt = $conn->prepare($sqlInsert);
-            $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
-            $stmt->bindParam(':fecha_hora_entrada', $fechaActual);
-            $stmt->execute();
-
-            return "Entrada registrada exitosamente.";
-        } catch (PDOException $e) {
-            return "Error al registrar la entrada: " . $e->getMessage();
-        } finally {
-            $conn = null;
-        }
-    }
-
-        public static function actualizarVol($idVoluntario, $campo, $rutaArchivo)
-        {
-            $pdo = Database::connect();
-            // La consulta debe utilizar los nombres de columna sin comillas simples
+            // Si es un voluntario, verificar si está habilitado
+            if ($type === 'voluntario' && ($user['estado'] === 'rechazado' || $user['estado'] === 'deshabilitado')) {
+                session_unset(); // Limpiar las variables de sesión
+                session_destroy(); // Destruir la sesión
+                return ['error' => 'Este voluntario está deshabilitado'];
+            }
 
 
-            try {
-                switch ($campo) {
-                    case 'CamEstUs':
-                        $sql = "UPDATE voluntarios SET estado = :rutaArchivo WHERE id = :idVoluntario";
-                        $claveEncriptada = $rutaArchivo;
-                        break;
-                    case 'foto':
-                        $sql = "UPDATE voluntarios SET foto_perfil = :rutaArchivo WHERE id = :idVoluntario";
-                        $claveEncriptada = $rutaArchivo;
-                        break;
-                    case 'CambClavVol':
-                        $sql = "UPDATE voluntarios SET clave = :rutaArchivo WHERE id = :idVoluntario";
-                        $claveEncriptada = password_hash($rutaArchivo, PASSWORD_DEFAULT);
-                        break;
-                    case 'Correo':
-                        $sql = "UPDATE voluntarios SET correo = :rutaArchivo WHERE id = :idVoluntario";
-                        $claveEncriptada = $rutaArchivo;
-                        break;
-                    case 'Telefono':
-                        $sql = "UPDATE voluntarios SET telefono = :rutaArchivo WHERE id = :idVoluntario";
-                        $claveEncriptada = $rutaArchivo;
-                        break;
+            session_status();
+            if (!empty($user)) {
+                switch ($type) {
+                    case 'voluntario':
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
+                        $_SESSION['user_email'] = htmlspecialchars($user['correo']);
+                        $_SESSION['user_type'] = $type;
 
-                    default:
+                        $_SESSION['UserLog'] = new Voluntario(
+                            htmlspecialchars($user['id']),
+                            htmlspecialchars($user['nombre']),
+                            htmlspecialchars($user['rut']),
+                            htmlspecialchars($user['telefono']),
+                            htmlspecialchars($user['correo']),
+                            htmlspecialchars($user['profesion']),
+                            htmlspecialchars($user['region']),
+                            htmlspecialchars($user['comuna']),
+                            htmlspecialchars($user['experiencia_voluntario']),
+                            htmlspecialchars($user['experiencia_otra_emergencia']),
+                            htmlspecialchars($user['recursos_propios']),
+                            htmlspecialchars($user['hobbies']),
+                            htmlspecialchars($user['tipo_alimentacion']),
+                            htmlspecialchars($user['grupo_sanguineo']),
+                            htmlspecialchars($user['enfermedades_cronicas']),
+                            htmlspecialchars($user['actividades']),
+                            htmlspecialchars($user['area_desempeno']),
+                            htmlspecialchars($user['experiencia_emergencias']),
+                            htmlspecialchars($user['experiencia_animales']),
+                            htmlspecialchars($user['experiencia_desastres']),
+                            htmlspecialchars($user['certificado_titulo']),
+                            htmlspecialchars($user['estado']),
+                            htmlspecialchars($user['fecha_registro']),
+                            htmlspecialchars($user['fotoperfil']),
+                            htmlspecialchars($user['certificado_antecedentes'])
+                        );
+                        break;
+                    case 'Coordinacion':
+                        $_SESSION['user_id'] = htmlspecialchars($user['id']);
+                        $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
+                        $_SESSION['user_email'] = htmlspecialchars($user['correo']);
+                        $_SESSION['user_type'] = $type;
+                        $_SESSION['region'] = htmlspecialchars($user['region_id']);
+
+
+                        $_SESSION['UserLog'] = new Consejo(
+                            htmlspecialchars($user['id']),
+                            htmlspecialchars($user['region_id']),
+                            htmlspecialchars($user['nombre']),
+                            htmlspecialchars($user['correo']),
+                            htmlspecialchars($user['nombre_coordinador']),
+                            htmlspecialchars($user['correo_coordinador'])
+                        );
+
+
+                        break;
+                    case 'Clinicas':
                         # code...
                         break;
                 }
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':rutaArchivo', $claveEncriptada);
-                $stmt->bindParam(':idVoluntario', $idVoluntario);
-                return $stmt->execute();  // Ejecuta la consulta y devuelve el resultado
-            } catch (PDOException $e) {
-                // Manejo de errores en caso de fallo
-                echo "Error al actualizar: " . $e->getMessage();
-                return false;
             }
+            return ['success' => true];
+        } catch (PDOException $e) {
+            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
         }
+    }
+
+
+
+    // Pendientes modicficacion clases
+
+
     public static function actualizarUsuario($idVoluntario, $campo, $rutaArchivo)
     {
         $pdo = Database::connect();
-        // La consulta debe utilizar los nombres de columna sin comillas simples
 
 
         try {
@@ -373,14 +301,23 @@ class Usuario
                 case 'CambProf':
                     $sql = "UPDATE voluntarios SET profesion = :rutaArchivo WHERE id = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_profesion($claveEncriptada);
+                    }
                     break;
                 case 'CamEstUs':
                     $sql = "UPDATE usuarios SET estado = :rutaArchivo WHERE id_usuario = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_estado($claveEncriptada);
+                    }
                     break;
                 case 'foto':
                     $sql = "UPDATE usuarios SET foto_perfil = :rutaArchivo WHERE id_usuario = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_foto_perfil($claveEncriptada);
+                    }
                     break;
                 case 'CambClavUs':
                     $sql = "UPDATE usuarios SET clave = :rutaArchivo WHERE id_usuario = :idVoluntario";
@@ -389,10 +326,16 @@ class Usuario
                 case 'Correo':
                     $sql = "UPDATE usuarios SET correo = :rutaArchivo WHERE id_usuario = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_correo($claveEncriptada);
+                    }
                     break;
                 case 'Telefono':
                     $sql = "UPDATE usuarios SET telefono = :rutaArchivo WHERE id_usuario = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_telefono($claveEncriptada);
+                    }
                     break;
             }
             $stmt = $pdo->prepare($sql);
@@ -432,8 +375,9 @@ class Usuario
     }
     public static function get_cedver($id)
     {
+        $credencial = null;
+        $pdo = Database::connect();
         try {
-            $pdo = Database::connect();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sql = "SELECT * FROM credenciales WHERE codigo_verificacion = :id";
             $stmt = $pdo->prepare($sql);
@@ -442,14 +386,18 @@ class Usuario
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($resultado) {
-                return $resultado;
-            } else {
-                return "";
+            if (!empty($resultado)) {
+                $credencial = new Credencial(
+                    $resultado['id'],
+                    $resultado['id_voluntario'],
+                    $resultado['cargo'],
+                    $resultado['institucion']
+                );
             }
         } catch (PDOException $e) {
             print 'Error: ' . $e->getMessage();
         }
+        return $credencial;
     }
     public static function get_cedusuario($id)
     {
@@ -625,109 +573,7 @@ class Usuario
         }
     }
 
-    public static function actualizarVoluntario($datos)
-    {
-        try {
-            $pdo = Database::connect();
 
-            // Inicia una transacción
-            $pdo->beginTransaction();
-
-            $id = $datos['id']; // ID del voluntario
-
-            // Crear carpeta basada en el ID si no existe
-            $uploadDir = 'uploads/' . $id . '/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true); // Crear la carpeta con permisos 777
-            }
-
-
-
-            // Función para eliminar archivos
-            function eliminarArchivo($archivo)
-            {
-                if (file_exists($archivo)) {
-                    unlink($archivo);
-                }
-            }
-
-            // Construir la consulta SQL
-            $sql = "
-                UPDATE voluntarios
-                SET
-                    nombre = :nombre,
-                    rut = :rut,
-                    telefono = :telefono,
-                    correo = :correo,
-                    profesion = :profesion,
-                    region = :region,
-                    comuna = :comuna,
-                    experiencia_voluntario = :experiencia_voluntario,
-                    experiencia_otra_emergencia = :experiencia_otra_emergencia,
-                    recursos_propios = :recursos_propios,
-                    hobbys = :hobbys,
-                    tipo_alimentacion = :tipo_alimentacion,
-                    grupo_sanguineo = :grupo_sanguineo,
-                    enfermedades_cronicas = :enfermedades_cronicas,
-                    actividades = :actividades,
-                    area_desempeno = :area_desempeno,
-                    experiencia_emergencias = :experiencia_emergencias,
-                    experiencia_animales = :experiencia_animales,
-                    experiencia_desastres = :experiencia_desastres,
-                    estado = :estado
-                WHERE id = :id
-            ";
-
-            // Si la contraseña no es parte del formulario, no la incluimos
-            if (!empty($datos['contrasena'])) {
-                $sql = str_replace("contrasena = :contrasena,", "", $sql);  // Eliminar el campo de la consulta
-            }
-
-            $stmt = $pdo->prepare($sql);
-
-            // Asignar parámetros
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-            $stmt->bindParam(':rut', $datos['rut'], PDO::PARAM_STR);
-            $stmt->bindParam(':telefono', $datos['telefono'], PDO::PARAM_STR);
-            $stmt->bindParam(':correo', $datos['correo'], PDO::PARAM_STR);
-            $stmt->bindParam(':profesion', $datos['profesion'], PDO::PARAM_STR);
-            $stmt->bindParam(':region', $datos['region'], PDO::PARAM_STR);
-            $stmt->bindParam(':comuna', $datos['comuna'], PDO::PARAM_STR);
-            $stmt->bindParam(':experiencia_voluntario', $datos['experiencia_voluntario'], PDO::PARAM_STR);
-            $stmt->bindParam(':experiencia_otra_emergencia', $datos['experiencia_otra_emergencia'], PDO::PARAM_STR);
-            $stmt->bindParam(':recursos_propios', $datos['recursos_propios'], PDO::PARAM_STR);
-            $stmt->bindParam(':hobbys', $datos['hobbys'], PDO::PARAM_STR);
-            $stmt->bindParam(':tipo_alimentacion', $datos['tipo_alimentacion'], PDO::PARAM_STR);
-            $stmt->bindParam(':grupo_sanguineo', $datos['grupo_sanguineo'], PDO::PARAM_STR);
-            $stmt->bindParam(':enfermedades_cronicas', $datos['enfermedades_cronicas'], PDO::PARAM_STR);
-            $stmt->bindParam(':actividades', $datos['actividades'], PDO::PARAM_STR);
-            $stmt->bindParam(':area_desempeno', $datos['area_desempeno'], PDO::PARAM_STR);
-            $stmt->bindParam(':experiencia_emergencias', $datos['experiencia_emergencias'], PDO::PARAM_STR);
-            $stmt->bindParam(':experiencia_animales', $datos['experiencia_animales'], PDO::PARAM_STR);
-            $stmt->bindParam(':experiencia_desastres', $datos['experiencia_desastres'], PDO::PARAM_STR);
-
-            $stmt->bindParam(':estado', $datos['estado'], PDO::PARAM_STR);
-
-            // Si la contraseña fue proporcionada, agregarla a la consulta
-            if (!empty($datos['contrasena'])) {
-                $stmt->bindParam(':contrasena', $datos['contrasena'], PDO::PARAM_STR);
-            }
-
-            // Ejecutar la consulta
-            $stmt->execute();
-
-            // Confirmar la transacción
-            $pdo->commit();
-
-            return true;
-        } catch (PDOException $e) {
-            // Revertir la transacción si algo falla
-            $pdo->rollBack();
-            error_log("Error al actualizar el voluntario con ID {$id}: " . $e->getMessage());
-            return false;
-        }
-    }
     public static function obtenerUsuariosId($id)
     {
         // Iniciar sesión si no está iniciada
@@ -772,7 +618,7 @@ class Usuario
         }
     }
 
-    public static function obtenerUsuarios()
+    public static function obtenerUsuarios() // Reformula a consejo
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -819,69 +665,8 @@ class Usuario
 
         return $usuarios;
     }
-    public static function obtenerVoluntarios()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
 
-        // Conexión a la base de datos
-        $conexion = Database::connect();
-        if (!$conexion) {
-            die('Error de conexión a la base de datos');
-        }
-
-        $usuarios = [];
-        try {
-            $sql = "SELECT * FROM voluntarios";
-            $sentencia = $conexion->prepare($sql);
-
-
-            $sentencia->execute();
-
-            $fila = $sentencia->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($fila as $resultado) {
-                $usuarios[] = [
-                    "id" => htmlspecialchars($resultado["id"]),
-                    "nombre" => htmlspecialchars($resultado["nombre"]),
-                    "rut" => htmlspecialchars($resultado["rut"]),
-                    "telefono" => htmlspecialchars($resultado["telefono"]),
-                    "correo" => htmlspecialchars($resultado["correo"]),
-                    "clave" => htmlspecialchars($resultado["clave"]),
-                    "profesion" => htmlspecialchars($resultado["profesion"]),
-                    "region" => htmlspecialchars($resultado["region"]),
-                    "comuna" => htmlspecialchars($resultado["comuna"]),
-                    "experiencia_voluntario" => htmlspecialchars($resultado["experiencia_voluntario"]),
-                    "experiencia_otra_emergencia" => htmlspecialchars($resultado["experiencia_otra_emergencia"]),
-                    "recursos_propios" => htmlspecialchars($resultado["recursos_propios"]),
-                    "hobbys" => htmlspecialchars($resultado["hobbys"]),
-                    "tipo_alimentacion" => htmlspecialchars($resultado["tipo_alimentacion"]),
-                    "grupo_sanguineo" => htmlspecialchars($resultado["grupo_sanguineo"]),
-                    "enfermedades_cronicas" => htmlspecialchars($resultado["enfermedades_cronicas"]),
-                    "actividades" => htmlspecialchars($resultado["actividades"]),
-                    "area_desempeno" => htmlspecialchars($resultado["area_desempeno"]),
-                    "experiencia_emergencias" => htmlspecialchars($resultado["experiencia_emergencias"]),
-                    "experiencia_animales" => htmlspecialchars($resultado["experiencia_animales"]),
-                    "experiencia_desastres" => htmlspecialchars($resultado["experiencia_desastres"]),
-                    "certificado_titulo" => htmlspecialchars($resultado["certificado_titulo"]),
-                    "estado" => htmlspecialchars($resultado["estado"]),
-                    "fecha_registro" => htmlspecialchars($resultado["fecha_registro"]),
-                    "Fotoperfil" => htmlspecialchars($resultado["Fotoperfil"]),
-                    "certificadoAntecedentes" => htmlspecialchars($resultado["certificadoAntecedentes"])
-                ];
-            }
-        } catch (PDOException $ex) {
-            error_log("Error al obtener voluntarios: " . $ex->getMessage());
-        }
-
-        $conexion = null;
-
-
-        return $usuarios;
-    }
-
-
+    // Reformular
     public static function guardarUsuario($nombre, $correo, $clave, $region, $consejo)
     {
         // Conectar a la base de datos
@@ -915,80 +700,307 @@ class Usuario
             return 'Error al guardar el usuario: ' . $e->getMessage();
         }
     }
-    public static function login($email, $password, $type)
+}
+
+
+class Voluntarios
+{
+    // LISTAS
+    public static function obtenerVoluntarioPorId($id)
     {
-        // Determinar la tabla según el tipo de usuario
-        $table = '';
-        switch ($type) {
-            case 'voluntario':
-                $query = "SELECT * FROM voluntarios WHERE correo = :email";
-                break;
-            case 'Coordinacion':
-                $query = "SELECT * FROM usuarios WHERE correo = :email";
-                break;
-            case 'Clinica':
-                $query = "SELECT * FROM clinicas WHERE correo = :email";
-                break;
-            default:
-                return ['error' => 'Tipo de usuario no válido'];
+        $voluntario = null;
+        $pdo = Database::connect();
+        try {
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS 
+                            nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
+                            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
+                            v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
+                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes 
+                            FROM voluntarios v JOIN regiones r ON v.id_region = r.ID
+                            WHERE v.ID = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':id', $id);
+
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!empty($resultado)) {
+                $voluntario = new Voluntario(
+                    htmlspecialchars($resultado['ID']),
+                    htmlspecialchars($resultado['nombre']),
+                    htmlspecialchars($resultado['RUT']),
+                    htmlspecialchars($resultado['Telefono']),
+                    htmlspecialchars($resultado['Correo']),
+                    htmlspecialchars($resultado['Profesion']),
+                    htmlspecialchars($resultado['nombre_region']),
+                    htmlspecialchars($resultado['Comuna']),
+                    htmlspecialchars($resultado['Experiencia_voluntario']),
+                    htmlspecialchars($resultado['Experiencia_otra_emergencia']),
+                    htmlspecialchars($resultado['Recursos_propios']),
+                    htmlspecialchars($resultado['Hobbys']),
+                    htmlspecialchars($resultado['Tipo_alimentacion']),
+                    htmlspecialchars($resultado['Grupo_sanguineo']),
+                    htmlspecialchars($resultado['Enfermedades_cronicas']),
+                    htmlspecialchars($resultado['Actividades']),
+                    htmlspecialchars($resultado['Area_desempeno']),
+                    htmlspecialchars($resultado['Experiencia_emergencias']),
+                    htmlspecialchars($resultado['Experiencia_animales']),
+                    htmlspecialchars($resultado['Experiencia_desastres']),
+                    $resultado['Certificado_titulo'],
+                    $resultado['Estado'],
+                    $resultado['Fecha_registro'],
+                    $resultado['Fotoperfil'],
+                    $resultado['CertificadoAntecedentes']
+                );
+            }
+        } catch (PDOException $e) {
+            print 'Error: ' . $e->getMessage();
+        }
+        return $voluntario;
+    }
+    public static function obtenerVoluntarios()
+    {
+        $voluntarios = [];
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
 
+        // Conexión a la base de datos
+        $conexion = Database::connect();
+        if (!$conexion) {
+            die('Error de conexión a la base de datos');
+        }
         try {
-            // Consultar la base de datos para encontrar el usuario
-            $pdo = Database::connect();
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes FROM voluntarios v JOIN regiones r ON v.id_region = r.ID
+            ";
+            $sentencia = $conexion->prepare($sql);
 
-            $stmt = $pdo->prepare($query);
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$user) {
-                return ['error' => 'Usuario no encontrado'];
+            $sentencia->execute();
+
+            $fila = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+            if (count($fila)) {
+                foreach ($fila as $resultado) {
+                    $voluntarios[] = new Voluntario(
+
+
+                        htmlspecialchars($resultado['ID']),
+                        htmlspecialchars($resultado['nombre']),
+                        htmlspecialchars($resultado['RUT']),
+                        htmlspecialchars($resultado['Telefono']),
+                        htmlspecialchars($resultado['Correo']),
+                        htmlspecialchars($resultado['Profesion']),
+                        htmlspecialchars($resultado['nombre_region']),
+                        htmlspecialchars($resultado['Comuna']),
+                        htmlspecialchars($resultado['Experiencia_voluntario']),
+                        htmlspecialchars($resultado['Experiencia_otra_emergencia']),
+                        htmlspecialchars($resultado['Recursos_propios']),
+                        htmlspecialchars($resultado['Hobbys']),
+                        htmlspecialchars($resultado['Tipo_alimentacion']),
+                        htmlspecialchars($resultado['Grupo_sanguineo']),
+                        htmlspecialchars($resultado['Enfermedades_cronicas']),
+                        htmlspecialchars($resultado['Actividades']),
+                        htmlspecialchars($resultado['Area_desempeno']),
+                        htmlspecialchars($resultado['Experiencia_emergencias']),
+                        htmlspecialchars($resultado['Experiencia_animales']),
+                        htmlspecialchars($resultado['Experiencia_desastres']),
+                        $resultado['Certificado_titulo'],
+                        $resultado['Estado'],
+                        $resultado['Fecha_registro'],
+                        $resultado['Fotoperfil'],
+                        $resultado['CertificadoAntecedentes']
+                    );
+                }
             }
+        } catch (PDOException $ex) {
+            error_log("Error al obtener voluntarios: " . $ex->getMessage());
+        }
 
-            // Verificar la contraseña
-            if (!password_verify($password, $user['clave'])) {
-                return ['error' => 'Contraseña incorrecta'];
-            }
+        $conexion = null;
+        return $voluntarios;
+    }
+    public static function actualizarVol($idVoluntario, $campo, $rutaArchivo)
+    {
+        $pdo = Database::connect();
+        // La consulta debe utilizar los nombres de columna sin comillas simples
+        $actualizar = false;
 
-            // Si es un voluntario, verificar si está habilitado
-            if ($type === 'voluntario' && ($user['estado'] === 'rechazado' || $user['estado'] === 'deshabilitado')) {
-                session_unset(); // Limpiar las variables de sesión
-                session_destroy(); // Destruir la sesión
-                return ['error' => 'Este voluntario está deshabilitado'];
-            }
-
-
-            session_status();
-            switch ($type) {
-                case 'voluntario':
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
-                    $_SESSION['user_email'] = htmlspecialchars($user['correo']);
-                    $_SESSION['user_type'] = $type;
-
-                    break;
-                case 'Coordinacion':
-                    $_SESSION['user_id'] = htmlspecialchars($user['id_usuario']);
-                    $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
-                    $_SESSION['user_email'] = htmlspecialchars($user['correo']);
-                    $_SESSION['user_type'] = $type;
-                    if ($type === 'Coordinacion') {
-                        $_SESSION['region'] = htmlspecialchars($user['region']);
-                        $_SESSION['consejo_regional'] = htmlspecialchars($user['consejo_regional']);
+        try {
+            switch ($campo) {
+                case 'CamEstUs':
+                    $sql = "UPDATE voluntarios SET estado = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_estado($claveEncriptada);
                     }
                     break;
-                case 'Clinicas':
+                case 'foto':
+                    $sql = "UPDATE voluntarios SET foto_perfil = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_foto_perfil($claveEncriptada);
+                    }
+                    break;
+                case 'CambClavVol':
+                    $sql = "UPDATE voluntarios SET clave = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = password_hash($rutaArchivo, PASSWORD_DEFAULT);
+                    break;
+                case 'Correo':
+                    $sql = "UPDATE voluntarios SET correo = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_correo($claveEncriptada);
+                    }
+                    break;
+                case 'Telefono':
+                    $sql = "UPDATE voluntarios SET telefono = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_telefono($claveEncriptada);
+                    }
+                    break;
+
+                default:
                     # code...
                     break;
             }
-            // Guardar información del usuario en la sesión
-
-
-            return ['success' => true];
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':rutaArchivo', $claveEncriptada);
+            $stmt->bindParam(':idVoluntario', $idVoluntario);
+            $r = $stmt->execute();
+            if ($r) {
+                $actualizar = true;
+            }  // Ejecuta la consulta y devuelve el resultado
         } catch (PDOException $e) {
-            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
+            // Manejo de errores en caso de fallo
+            echo "Error al actualizar: " . $e->getMessage();
+        }
+        return $actualizar;
+    }
+    // PENDIENTES
+    public static function obtenerVoluntariosConIngreso()
+    {
+        $conn =  Database::connect();
+        try {
+            // Consulta SQL
+            $sql = "
+            SELECT 
+                v.nombre AS nombre_voluntario,
+                v.tipo_alimentacion AS tipo_alimentacion,
+                c.nombre_clinica AS nombre_clinica,
+                c.region AS region_clinica,
+                c.comuna AS comuna_clinica
+            FROM 
+                voluntarios v
+            JOIN 
+                RegistroEntradasSalidas r ON v.id_voluntario = r.id_voluntario
+            JOIN 
+                clinicas c ON r.id_clinica = c.id_clinica
+            WHERE 
+                r.fecha_salida IS NULL
+        ";
+
+            // Preparar la consulta
+            $stmt = $conn->prepare($sql);
+
+            // Ejecutar la consulta
+            $stmt->execute();
+
+            // Obtener los resultados como un array asociativo
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Manejo de errores
+            error_log("Error en obtenerVoluntariosConIngreso: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function registrarSalida($voluntarioId, $lugarId)
+    {
+        $conn =  Database::connect();
+        if ($conn === null) {
+            return "Error de conexión a la base de datos.";
+        }
+
+        $fechaActual = date('Y-m-d H:i:s'); // Fecha y hora actual
+
+        try {
+            // Verificar si hay un registro de entrada sin salida
+            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
+                         WHERE voluntario_id = :voluntario_id 
+                         AND lugar_id = :lugar_id 
+                         AND fecha_hora_salida IS NULL 
+                         ORDER BY fecha_hora_entrada DESC LIMIT 1";
+            $stmt = $conn->prepare($sqlCheck);
+            $stmt->bindParam(':voluntario_id', $voluntarioId);
+            $stmt->bindParam(':lugar_id', $lugarId);
+            $stmt->execute();
+
+            if ($stmt->rowCount() === 0) {
+                return "No hay un registro de entrada sin salida para este voluntario.";
+            }
+
+            // Obtener el ID del registro de entrada sin salida
+            $registro = $stmt->fetch(PDO::FETCH_ASSOC);
+            $registroId = $registro['id'];
+
+            // Actualizar la fecha y hora de salida
+            $sqlUpdate = "UPDATE RegistroEntradasSalidas 
+                          SET fecha_hora_salida = :fecha_hora_salida 
+                          WHERE id = :id";
+            $stmt = $conn->prepare($sqlUpdate);
+            $stmt->bindParam(':fecha_hora_salida', $fechaActual);
+            $stmt->bindParam(':id', $registroId);
+            $stmt->execute();
+
+            return "Salida registrada exitosamente.";
+        } catch (PDOException $e) {
+            return "Error al registrar la salida: " . $e->getMessage();
+        } finally {
+            $conn = null;
+        }
+    }
+
+    public static function registrarEntrada($voluntarioId, $lugarId)
+    {
+        $conn = Database::connect();
+        if ($conn === null) {
+            return "Error de conexión a la base de datos.";
+        }
+
+        $fechaActual = date('Y-m-d H:i:s'); // Fecha y hora actual
+
+        try {
+
+            // Verificar si ya existe una entrada sin salida para este voluntario
+            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
+                         WHERE voluntario_id = :voluntario_id 
+                         AND lugar_id = :lugar_id 
+                         AND fecha_hora_salida IS NULL";
+            $stmt = $conn->prepare($sqlCheck);
+            $stmt->bindParam(':voluntario_id', $voluntarioId);
+            $stmt->bindParam(':lugar_id', $lugarId);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return "Ya existe un registro de entrada sin salida para este voluntario.";
+            }
+
+            // Insertar la nueva entrada
+            $sqlInsert = "INSERT INTO RegistroEntradasSalidas (voluntario_id, lugar_id, fecha_hora_entrada) 
+                          VALUES (:voluntario_id, :lugar_id, :fecha_hora_entrada)";
+            $stmt = $conn->prepare($sqlInsert);
+            $stmt->bindParam(':voluntario_id', $voluntarioId);
+            $stmt->bindParam(':lugar_id', $lugarId);
+            $stmt->bindParam(':fecha_hora_entrada', $fechaActual);
+            $stmt->execute();
+
+            return "Entrada registrada exitosamente.";
+        } catch (PDOException $e) {
+            return "Error al registrar la entrada: " . $e->getMessage();
+        } finally {
+            $conn = null;
         }
     }
 }
