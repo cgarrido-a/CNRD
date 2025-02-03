@@ -8,7 +8,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="guardararchivo2.php" method="post" enctype="multipart/form-data">
+            <form action="../src/savearchmp.php" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" id="id_usuario" name="id" value="<?php echo $_SESSION['UserLog']->obtener_id(); ?>">
                     <input type="file" class="form-control-file" id="newFotoPerfil" name="newFotoPerfil">

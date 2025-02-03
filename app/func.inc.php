@@ -172,7 +172,30 @@ class Clinicas
 
 class Usuario
 {
-
+    public static function obtener_regiones()
+    {
+        $regiones = [];
+        $conexion = Database::connect();
+        try {
+            $sql = "SELECT * FROM regiones";
+            $sentencia = $conexion->prepare($sql);
+            $sentencia->execute();
+            $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+            if (count($resultado)) {
+                foreach ($resultado as $fila) {
+                    if ($fila['nombre'] != 'Nacional') {
+                        $regiones[] = [
+                            "id" => htmlspecialchars($fila["id"]),
+                            "nombre" => htmlspecialchars($fila["nombre"])
+                        ];
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
+        }
+        return $regiones;
+    }
     //Listas modificacion clases
     public static function login($email, $password, $type)
     {
@@ -231,7 +254,7 @@ class Usuario
                         $_SESSION['user_email'] = htmlspecialchars($user['Correo']);
                         $_SESSION['user_type'] = $type;
 
-                        $_SESSION['UserLog'] =new Voluntario(
+                        $_SESSION['UserLog'] = new Voluntario(
                             htmlspecialchars($user['ID']),
                             htmlspecialchars($user['nombre']),
                             htmlspecialchars($user['RUT']),

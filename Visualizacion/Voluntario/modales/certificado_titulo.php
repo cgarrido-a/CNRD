@@ -6,7 +6,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="guardararchivo.php" method="post" enctype="multipart/form-data">
+        <form action="../src/savearchmp.php" method="post" enctype="multipart/form-data">
           <div class="modal-body">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($voluntario['id']); ?>">
             <input type="file" class="form-control-file" id="newCertificadoTitulo" name="newCertificadoTitulo">

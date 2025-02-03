@@ -1,9 +1,9 @@
 <?php
-// Mostrar errores para depuración
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
 
+include_once('../plantillas/LLamstan.inc.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -13,9 +13,8 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 
-require_once(__DIR__ . '/../app/func.inc.php');
-require_once(__DIR__ . '/../fpdf/fpdf.php');
-require_once(__DIR__ . '/../phpqrcode-master/qrlib.php');
+include_once(__DIR__ . '/../../../fpdf/fpdf.php');
+include_once(__DIR__ . '/../../../phpqrcode-master/qrlib.php');
 
 // Validación de acceso
 if (!isset($_GET['id'])) {
@@ -68,39 +67,27 @@ class PDF_Rotate extends FPDF
 }
 
 // Obtener información del usuario o voluntario
-$id = $_GET['id'];
+$id = $_SESSION['UserLog']->obtener_id();
 $id_formateado = '';
 
-if (strpos($id, 'c-') === 0) {
-    $usuario = Usuario::get_cedusuario($id);
-    $usuario2 = Usuario::obtenerUsuariosId(explode('-', $id)[1]);
-    $nombre = $usuario['nombre'] ?? 'Nombre no definido';
-    $cargo = $usuario['cargo'] ?? 'Sin cargo';
-    $institucion = $usuario['institucion'] ?? 'Sin institución';
-    $codigo_verificacion = $usuario['codigo_verificacion'] ?? '';
-    $fotoperfil = $usuario2['foto_perfil'];
-    $id_formateado = 'C-' . explode('-', $id)[1];
-} else {
-    $usuario = Usuario::get_cedusuario($id);
-    $usuario2 = Usuario::obtenerVoluntarioPorId($id);
-    $nombre = $usuario['nombre'] ?? 'Nombre no definido';
-    $cargo = $usuario['cargo'] ?? 'Sin cargo';
-    $institucion = $usuario['institucion'] ?? 'Sin institución';
-    $codigo_verificacion = $usuario['codigo_verificacion'] ?? '';
-    $fotoperfil = $usuario2['Fotoperfil'];
-    $id_formateado = 'V-' . $id;
-}
+$id = $_SESSION['UserLog']->obtener_id();
+$usuario = Usuario::get_cedusuario($id);
+$usuario2 = Voluntarios::obtenerVoluntarioPorId($id);
+$fotoperfil = $usuario2->obtener_fotoperfil();
+$nombre= $usuario['nombre'];
+$cargo= $usuario['cargo'];
+$institucion= $usuario['institucion'];
 
 if (!$usuario || !$usuario2) {
     die('Error: Usuario no encontrado.');
 }
 
-if ($usuario2['estado'] !== 'habilitado') {
+if ($_SESSION['UserLog']->obtener_estado() !== 'habilitado') {
     die('Error: El usuario no está activo.');
 }
 
 // Generar URL para QR
-$url = 'https://cnrd-intranet.free.nf/validacion.php?validador=' . $codigo_verificacion;
+$url = 'https://cnrd-intranet.free.nf/validacion.php?validador=' . $usuario['codigo_verificacion'];
 $tempDir = __DIR__ . '/../temp/';
 if (!file_exists($tempDir)) {
     mkdir($tempDir, 0755, true);
@@ -124,11 +111,11 @@ $pdf->SetFillColor(240, 240, 240);
 $pdf->Rect($credencialX, $credencialY, 54, 86, 'DF');
 
 // Logo
-$pdf->Image(__DIR__ . '/../img/cnrd.png', $credencialX + 14, $credencialY - 2, 25);
+$pdf->Image(__DIR__ . '/../../../img/cnrd.png', $credencialX + 14, $credencialY - 2, 25);
 
 // Foto de perfil
-if ($fotoperfil && file_exists(__DIR__ . '/../' . $fotoperfil)) {
-    $perfilPath = __DIR__ . '/../' . $fotoperfil;
+if ($fotoperfil && file_exists(__DIR__ . '/../../..' . $fotoperfil)) {
+    $perfilPath = __DIR__ . '/../../..' . $fotoperfil;
     $pdf->Image($perfilPath, $credencialX + 17, $credencialY + 23.5, 20, 26.6669);
 }
 

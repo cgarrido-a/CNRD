@@ -28,7 +28,9 @@ class Voluntario
     private $fotoperfil;
     private $certificado_antecedentes;
 
-    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, $certificado_antecedentes)
+    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, 
+    $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, 
+    $certificado_antecedentes)
     {
         $this->id = $id;
         $this->nombre = $nombre;
@@ -57,10 +59,11 @@ class Voluntario
         $this->certificado_antecedentes = $certificado_antecedentes;
     }
 
-    public function cambiar_profesion($profesion) { return $this->profesion = $profesion; }
-    public function cambiar_estado($estado) { return $this->estado = $estado; }
-    public function cambiar_telefono($telefono) { return $this->telefono = $telefono; }
-    public function cambiar_correo($correo) { return $this->correo = $correo; }
+    public function cambiar_telefono($telefono) {$this->telefono = $telefono; }
+    public function cambiar_correo($correo) {$this->correo = $correo; }
+    public function cambiar_fotoperfil($fotoperfil) {$this->fotoperfil = $fotoperfil; }
+    public function cambiar_certificado_antecedentes($certificado_antecedentes) {$this->certificado_antecedentes = $certificado_antecedentes; }
+    public function cambiar_certificado_titulo($certificado_titulo) {$this->certificado_titulo = $certificado_titulo; }
     public function obtener_id(){ return $this->id; }
     public function obtener_nombre(){ return $this->nombre; }
     public function obtener_rut(){ return $this->rut; }

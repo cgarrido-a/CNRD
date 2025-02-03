@@ -180,7 +180,7 @@
                     }
 
                     $.ajax({
-                        url: 'app/pasar.inc.php',
+                        url: '../src/funajax.php',
                         type: 'POST',
                         data: {
                             variable: 'CamUs',
@@ -191,7 +191,7 @@
                         },
                         success: function(response) {
                             console.log(`Respuesta del servidor: ${response}`);
-                            if (response === '1correcto') {
+                            if (response === 'correcto') {
                                 location.reload();
                             } else {
                                 alert(`Error: ${response}`);
@@ -247,49 +247,7 @@
                     document.body.dataset.userType = "<?php echo $_SESSION['user_type']; ?>";
                     document.body.dataset.userId = "<?php echo $_SESSION['user_id']; ?>";
                 });
-            </script>
-
-            <script>
-                document.getElementById('btnCambiarClave').addEventListener('click', function() {
-                    $('#modalClave').modal('show');
-                });
-
-                document.getElementById('btnCambiarClaveModal').addEventListener('click', function() {
-                    const nuevaClave = document.getElementById('nuevaClave').value;
-                    const id = document.getElementById('id_usuario').value;
-                    const confirmarClave = document.getElementById('confirmarClave').value;
-                    if (nuevaClave === confirmarClave) {
-                        $.ajax({
-                            url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
-                            type: 'POST',
-                            data: {
-                                variable: 'CambClavVol',
-                                id: id,
-                                nuevaClave: nuevaClave
-                            },
-                            success: function(response) {
-                                console.log(response)
-                                if (response === 'correcto') {
-                                    location.reload()
-                                } else {
-                                    alert('Error al cambiar clave' + response);
-                                }
-                            },
-                            error: function(response) {
-                                console.log(response)
-                                alert('Hubo un problema al enviar los datos.' + response);
-                            }
-                        });
-                    } else {
-                        alert('Las claves no coinciden');
-                    }
-
-                });
-            </script>
-            <?php
-
-            ?>
-            <script>
+           
                 document.getElementById('btnCambiarClave').addEventListener('click', function() {
                     $('#modalClave').modal('show');
                 });
@@ -303,7 +261,7 @@
 
                     if (nuevaClave === confirmarClave) {
                         $.ajax({
-                            url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
+                            url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                             type: 'POST',
                             data: {
                                 variable: 'CambClavUs',

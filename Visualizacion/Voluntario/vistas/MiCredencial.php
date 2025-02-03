@@ -7,10 +7,7 @@ include_once('../plantillas/LLamstan.inc.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user_type'])) {
-    header('Location: login.html');
-    exit();
-}
+
 
 $user_type = $_SESSION['user_type'];
 $servidor = 'http://cnrd-intranet.free.nf/';
@@ -21,22 +18,18 @@ if (!isset($_SESSION['user_type']) || !isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Inicializar variables
-$id = $_GET['id'] ?? null;
-$getId = $_GET['id'] ?? null;
-// Validar si $id es null
-
-// Función para validar si el ID tiene formato 'c-[número]'
+$id = $_SESSION['UserLog']->obtener_id()?? null;
+$getId = $_SESSION['UserLog']->obtener_id() ?? null;
 function esIdCoordinacionValido($getId, $userId)
 {
     return strpos($getId, 'c-') === 0 && $getId === 'c-' . $userId;
 }
 
-        $id = $_GET['id'];
+        $id = $_SESSION['UserLog']->obtener_id();
         $usuario = Usuario::get_cedusuario($id);
         $usuario2 = Voluntarios::obtenerVoluntarioPorId($id);
         $fotoperfil = $usuario2->obtener_fotoperfil();
-        
+
 
 if ($id === null) {
     header("Location: index.php");
@@ -47,10 +40,7 @@ if (!$usuario) {
     echo '<div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; text-align: center;">Error: Usuario sin credencial habilitada.</div>';
     die();
 }
-
-
-if ($usuario2['estado'] !== 'habilitado') {
-    die('Error: El usuario no está activo.');
+if ($_SESSION['UserLog']->obtener_estado() !== 'habilitado') {
     echo '<div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; text-align: center;">Error: Usuario no esta activo.</div>';
     die();
 }
@@ -260,7 +250,6 @@ $qrImage = base64_encode(ob_get_clean());
         }
     </style>
 </head>
-
 <body>
     <?php
 
@@ -286,11 +275,8 @@ $qrImage = base64_encode(ob_get_clean());
             </div>
             <div class="id-vertical">
                 <?php
-                if (isset(explode('-', $id)[1])) {
-                    echo htmlspecialchars($id);
-                } else {
-                    echo htmlspecialchars('C-' . $id);
-                }
+                    echo htmlspecialchars('V-'.$id);
+                
                 ?>
             </div>
         </div>
@@ -302,7 +288,7 @@ $qrImage = base64_encode(ob_get_clean());
             </a>
 
             <!-- Botón Imprimir -->
-            <a href="plantillas/credencial.php?id=<?php echo $id; ?>" class="btn btn-outline-success btn-lg px-4 py-2 shadow rounded-pill">
+            <a href="credencial.php?id=<?php echo $id; ?>" class="btn btn-outline-success btn-lg px-4 py-2 shadow rounded-pill">
                 <i class="bi bi-printer"></i> Imprimir
             </a>
         </div>
