@@ -115,7 +115,7 @@ var_dump($voluntario);
                 <div class="col-md-6">
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
-                    <?php echo 'holap'.$voluntario->obtener_certificado_titulo(); generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
+                    <?php  generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
                     <hr> 
                     <?php   generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>

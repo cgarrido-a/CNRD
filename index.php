@@ -7,16 +7,15 @@ include_once(__DIR__ . '/app/class.inc.php');
 include_once(__DIR__ . '/app/func.inc.php');
 session_start();
 
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['UserLog'])) {
     header('Location: login.html'); // Redirige al login si no hay sesión activa
     exit();
 }
+$type = $_SESSION['UserLog']->obtener_TypeUser();
 
-
-$ruta2 = __DIR__ . '/Visualizacion/Voluntario/';
-
+$ruta2 = __DIR__ . '/Visualizacion/'.$type.'/';
 include_once($ruta2 . 'plantillas/LLamstan.inc.php');
 
-$ruta =  'Visualizacion/Voluntario/vistas/';
+$ruta =  'Visualizacion/'.$type.'/vistas/';
 include_once($ruta2 . 'plantillas/DecInc.inc.php');
 ?>

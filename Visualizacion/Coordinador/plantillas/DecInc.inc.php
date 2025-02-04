@@ -2,11 +2,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['UserLog'])) {
     header('Location: login.html');
     exit();
 }
-include_once('app/func.inc.php');
 $user_type = $_SESSION['user_type'];
 $servidor = 'http://cnrd-intranet.free.nf/'
 ?>
@@ -24,8 +23,8 @@ $servidor = 'http://cnrd-intranet.free.nf/'
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="app/styles.css">
-    <script src="js/qrCode.min.js"></script>
+    <link rel="stylesheet" href="../../../app/styles.css">
+    <script src="../../../js/qrCode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -40,24 +39,24 @@ $servidor = 'http://cnrd-intranet.free.nf/'
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="voluntarios.php">Voluntarios</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'voluntarios.php'; ?>">Voluntarios</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="clinicas.php">Clincias</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'clinicas.php'; ?>">Clincias</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="usuario.php">Usuarios</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'usuario.php'; ?>">Usuarios</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Asistencia
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="despvol.php">Voluntarios desplegados</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $ruta. 'despvol.php'; ?>">Voluntarios desplegados</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="hisasisvol.php">Historial asistencia</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $ruta. 'hisasisvol.php'; ?>">Historial asistencia</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -66,7 +65,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
             </ul>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="miperfil.php">Mi Perfil</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'miperfil.php'; ?>">Mi Perfil</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="cerrar_sesion.php">Cerrar Sesión</a>

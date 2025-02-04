@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-if (!isset($_SESSION['user_type'])) {
+if (!isset($_SESSION['UserLog'])) {
     header('Location: login.html'); // Redirige al login si no hay sesión activa
     exit();
 }

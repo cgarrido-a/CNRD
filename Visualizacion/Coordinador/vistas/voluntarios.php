@@ -7,9 +7,10 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-
+$ruta= '';
 include_once('../plantillas/DecInc.inc.php');
 $voluntarios = Voluntarios::obtenerVoluntarios();
+
 $vols = [];
 $regiones = Usuario::obtener_regiones();
 if (count($voluntarios)) {
@@ -45,12 +46,13 @@ if (count($voluntarios)) {
                 <option value="Voluntario General">Voluntario General</option>
             </select>
         </div>
-        <?php if ($_SESSION['region'] === 'Nacional') { ?>
+        
+        <?php  if ($_SESSION['UserLog']->obtener_region() === 'Nacional') { ?>
             <div class="col-md">
                 <select id="filtroRegion" class="form-select" onchange="filtrarTabla()">
                     <?php
                     foreach ($regiones as $region) {
-                        echo "<option value='" . $region['nombre'] . "'>" . $region['nombre'] . "</option>";
+                        echo "<option value='" . $region['Region'] . "'>" . $region['Region'] . "</option>";
                     }
                     ?>
                 </select>
@@ -114,9 +116,9 @@ if (count($voluntarios)) {
         voluntario.region = decodeHTML(voluntario.region);
     });
     <?php
-    if ($_SESSION['UserLog']->obtener_region_id() != 'Nacional') {
+    if ($_SESSION['UserLog']->obtener_region() != 'Nacional') {
     ?>
-        var reg = "<?php echo $_SESSION['UserLog']->obtener_region_id(); ?>";
+        var reg = "<?php echo $_SESSION['UserLog']->obtener_region(); ?>";
         voluntarios = voluntarios.filter(voluntario => voluntario.region === reg && voluntario.estado === 'habilitado');
     <?php
     }

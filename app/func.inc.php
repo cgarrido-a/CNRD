@@ -183,10 +183,10 @@ class Usuario
             $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
             if (count($resultado)) {
                 foreach ($resultado as $fila) {
-                    if ($fila['nombre'] != 'Nacional') {
+                    if ($fila['Region'] != 'Nacional') {
                         $regiones[] = [
-                            "id" => htmlspecialchars($fila["id"]),
-                            "nombre" => htmlspecialchars($fila["nombre"])
+                            "id" => htmlspecialchars($fila["ID"]),
+                            "nombre" => htmlspecialchars($fila["Region"])
                         ];
                     }
                 }
@@ -205,7 +205,7 @@ class Usuario
                             nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
                             v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
                             v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
-                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes 
+                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser 
                             FROM voluntarios v JOIN regiones r ON v.id_region = r.ID WHERE v.correo = :email";
                 break;
             case 'Coordinacion':
@@ -279,7 +279,8 @@ class Usuario
                             $user['Estado'],
                             $user['Fecha_registro'],
                             $user['Fotoperfil'],
-                            $user['CertificadoAntecedentes']
+                            $user['CertificadoAntecedentes'],
+                            htmlspecialchars($user['TypeUser'])
                         );
                         break;
                     case 'Coordinacion':
@@ -731,6 +732,31 @@ class Usuario
 
 class Voluntarios
 {
+    public static function ObtenerCertificados($id)
+    {
+        $conexion = Database::connect();
+        $certificados = [];
+        try {
+            $sql = "SELECT * FROM certificados WHERE id_voluntario = :id";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $fila = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (count($fila)) {
+                foreach ($fila as $resultado) {
+                    $certificados[] = [
+                        "id_voluntario" => $fila['id_voluntario'],
+                        "Titulo" => $fila['Titulo'],
+                        "Ubicacion" => $fila['Ubicacion']
+                    ];
+                }
+            }
+        } catch (PDOException $ex) {
+            error_log("Error al obtener certificados: " . $ex->getMessage());
+            print "Error al obtener certificados: " . $ex->getMessage();
+        }
+        return $certificados;
+    }
     // LISTAS
     public static function obtenerVoluntarioPorId($id)
     {
@@ -742,7 +768,7 @@ class Voluntarios
                             nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
                             v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
                             v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
-                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes 
+                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser
                             FROM voluntarios v JOIN regiones r ON v.id_region = r.ID
                             WHERE v.ID = :id";
             $stmt = $pdo->prepare($sql);
@@ -777,7 +803,8 @@ class Voluntarios
                     $resultado['Estado'],
                     $resultado['Fecha_registro'],
                     $resultado['Fotoperfil'],
-                    $resultado['CertificadoAntecedentes']
+                    $resultado['CertificadoAntecedentes'],
+                    htmlspecialchars($resultado['TypeUser'])
                 );
             }
         } catch (PDOException $e) {
@@ -788,29 +815,23 @@ class Voluntarios
     public static function obtenerVoluntarios()
     {
         $voluntarios = [];
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
 
         // Conexión a la base de datos
         $conexion = Database::connect();
-        if (!$conexion) {
-            die('Error de conexión a la base de datos');
-        }
         try {
-            $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes FROM voluntarios v JOIN regiones r ON v.id_region = r.ID
-            ";
+            $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia,
+            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, v.Experiencia_emergencias,
+            v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser
+            FROM voluntarios v JOIN regiones r ON v.id_region = r.ID";
+
             $sentencia = $conexion->prepare($sql);
-
-
-            $sentencia->execute();
-
+            $sentencia->execute(); // Ejecutar la consulta
             $fila = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+
+
             if (count($fila)) {
                 foreach ($fila as $resultado) {
                     $voluntarios[] = new Voluntario(
-
-
                         htmlspecialchars($resultado['ID']),
                         htmlspecialchars($resultado['nombre']),
                         htmlspecialchars($resultado['RUT']),
@@ -835,11 +856,13 @@ class Voluntarios
                         $resultado['Estado'],
                         $resultado['Fecha_registro'],
                         $resultado['Fotoperfil'],
-                        $resultado['CertificadoAntecedentes']
+                        $resultado['CertificadoAntecedentes'],
+                        htmlspecialchars($resultado['TypeUser'])
                     );
                 }
             }
         } catch (PDOException $ex) {
+            echo '<script>alert("'.$ex->getMessage().'")</script>';
             error_log("Error al obtener voluntarios: " . $ex->getMessage());
         }
 
@@ -904,7 +927,6 @@ class Voluntarios
         }
         return $actualizar;
     }
-    // PENDIENTES
     public static function obtenerVoluntariosConIngreso()
     {
         $conn =  Database::connect();
@@ -1029,4 +1051,5 @@ class Voluntarios
             $conn = null;
         }
     }
+    // PENDIENTES
 }

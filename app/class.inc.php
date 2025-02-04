@@ -27,10 +27,11 @@ class Voluntario
     private $fecha_registro;
     private $fotoperfil;
     private $certificado_antecedentes;
+    private $TypeUser;
 
     public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, 
     $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, 
-    $certificado_antecedentes)
+    $certificado_antecedentes,$TypeUser)
     {
         $this->id = $id;
         $this->nombre = $nombre;
@@ -57,6 +58,7 @@ class Voluntario
         $this->fecha_registro = $fecha_registro;
         $this->fotoperfil = $fotoperfil;
         $this->certificado_antecedentes = $certificado_antecedentes;
+        $this->TypeUser = $TypeUser;
     }
 
     public function cambiar_telefono($telefono) {$this->telefono = $telefono; }
@@ -64,6 +66,7 @@ class Voluntario
     public function cambiar_fotoperfil($fotoperfil) {$this->fotoperfil = $fotoperfil; }
     public function cambiar_certificado_antecedentes($certificado_antecedentes) {$this->certificado_antecedentes = $certificado_antecedentes; }
     public function cambiar_certificado_titulo($certificado_titulo) {$this->certificado_titulo = $certificado_titulo; }
+    public function cambiar_TypeUser($TypeUser) {$this->TypeUser = $TypeUser; }
     public function obtener_id(){ return $this->id; }
     public function obtener_nombre(){ return $this->nombre; }
     public function obtener_rut(){ return $this->rut; }
@@ -89,6 +92,7 @@ class Voluntario
     public function obtener_fecha_registro(){ return $this->fecha_registro; }
     public function obtener_fotoperfil(){ return $this->fotoperfil; }
     public function obtener_certificado_antecedentes(){ return $this->certificado_antecedentes; }
+    public function obtener_TypeUser(){ return $this->TypeUser; }
 }
 
 class Ubicaciones

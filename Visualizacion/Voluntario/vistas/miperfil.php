@@ -21,7 +21,6 @@ foreach (glob("../modales/*.php") as $archivo) {
     include_once $archivo;
 
 }
-var_dump($_SESSION['UserLog']);
 ?>
 <div class="container mt-5">
     <h1 class="mb-4">Mi Perfil</h1>

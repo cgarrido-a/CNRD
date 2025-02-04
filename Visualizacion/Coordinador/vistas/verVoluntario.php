@@ -2,8 +2,13 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
-include_once('app/class.inc.php');
-include_once('plantillas/DecInc.inc.php');
+//HAY QUE CORREGIR CON LOS CAMBIOS EN LA BASE DE DATOS
+
+include_once('../plantillas/LLamstan.inc.php');
+session_start();
+
+$ruta= '';
+include_once('../plantillas/DecInc.inc.php');
 
 // Validación de ID del voluntario
 $idVoluntario = $_GET['id'] ?? null;
@@ -27,10 +32,13 @@ $institucion = 'CNRD ' . $voluntario->obtener_region();
 function mostrarError($mensaje)
 {
     echo '<div class="alert alert-danger text-center mt-5">' . htmlspecialchars($mensaje) . '</div>';
-    include_once('plantillas/DecFin.inc.php');
+    include_once('../plantillas/DecFin.inc.php');
 }
 
-var_dump($voluntario);
+foreach (glob("../modales/*.php") as $archivo) {
+    include_once $archivo;
+
+}
 ?>
 
 
@@ -115,7 +123,7 @@ var_dump($voluntario);
                 <div class="col-md-6">
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
-                    <?php echo 'holap'.$voluntario->obtener_certificado_titulo(); generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
+                    <?php generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
                     <hr> 
                     <?php   generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>
@@ -130,7 +138,7 @@ var_dump($voluntario);
                     <hr>
                     <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
                     <label for="estado">Acción</label>
-                    <?php if ($voluntario['estado'] === 'habilitado') { ?>
+                    <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
                         <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
                     <?php 
                     }
@@ -138,7 +146,7 @@ var_dump($voluntario);
                 </div>
                 <div class="col-md-6 text-center">
 
-                    <?php if ($voluntario['estado'] != 'rechazado') { ?>
+                    <?php if ($voluntario->obtener_estado() != 'rechazado') { ?>
                         <?php if ($credencial) { ?>
                             <h5>Credencial</h5>
                             <hr>
@@ -159,22 +167,15 @@ var_dump($voluntario);
     </div>
 </div>
 
-<!-- Modales reutilizables -->
 <?php
-include('../modales/camclav.php.php');
-include('../modales/credencial.php');
-include('../modales/foto_perfil.php');
-include('../modales/certificado_titulo.php');
-include('../modales/certificado_antecedentes.php');
-include('../modales/profesion.php');
-include('../modales/camclav.php');
+
 
 // Funciones auxiliares
 function generarDetalle($detalles)
 {
     foreach ($detalles as $label => $valor) {
         echo '<p><strong>' . htmlspecialchars($label) . ':</strong> ' . htmlspecialchars($valor) . '</p>';
-        if ($_SESSION['region'] === 'Nacional' && $label === 'Profesión') {
+        if ( $label === 'Profesión') {
             ?>
             <button type="button" class="btn btn-xs btn-primary" data-bs-toggle="modal" data-bs-target="#modalProfesion">
                 Cambiar Profesión
@@ -220,5 +221,5 @@ function generarDocumento($label, $url, $modalTarget)
     echo '<button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nuevo Documento</button></p>';
 }
 
-include_once('plantillas/DecFin.inc.php');
+include_once('../plantillas/DecFin.inc.php');
 ?>

@@ -10,7 +10,7 @@
     <?php
     switch (basename($_SERVER['PHP_SELF'])) {
         case 'asistencia.php':
-        ?>
+    ?>
             <script>
                 // Crea el elemento video
                 const video = document.createElement("video");
@@ -109,11 +109,11 @@
                             }
                         });
 
-                        var id = '<?php echo $_SESSION['user_id']; ?>';
+                        var id = '<?php echo $_SESSION['UserLog']->obtener_id(); ?>';
                         var accion = document.getElementById('accvol').value;
 
                         $.ajax({
-                            url: 'app/pasar.inc.php',
+                            url: '../src/funajax.php',
                             type: 'POST',
                             data: {
                                 variable: 'MarAsisVol',
@@ -133,12 +133,25 @@
                                         showConfirmButton: true,
                                     });
                                 } else {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Registro de Asistencia',
-                                        text: response, // Mensaje de éxito si no hay errores
-                                        showConfirmButton: true,
-                                    });
+                                    switch (accion) {
+                                        case 'iniciar':
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Ingreso registrado',
+                                                text: response, // Mensaje de éxito si no hay errores
+                                                showConfirmButton: true,
+                                            });
+                                            break;
+                                        case 'cerrar':
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Salida registrada',
+                                                text: response, // Mensaje de éxito si no hay errores
+                                                showConfirmButton: true,
+                                            });
+                                            break;
+                                    }
+
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -247,7 +260,7 @@
                     document.body.dataset.userType = "<?php echo $_SESSION['user_type']; ?>";
                     document.body.dataset.userId = "<?php echo $_SESSION['user_id']; ?>";
                 });
-           
+
                 document.getElementById('btnCambiarClave').addEventListener('click', function() {
                     $('#modalClave').modal('show');
                 });
@@ -286,7 +299,7 @@
                     }
                 });
             </script>
-        <?php
+    <?php
             break;
     }
     ?>
