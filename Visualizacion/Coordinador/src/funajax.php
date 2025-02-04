@@ -11,6 +11,66 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 switch ($_POST['variable']) {
+    case 'CamEstVol':
+        if (isset($_POST['id']) && isset($_POST['valor'])) {
+            $id = $_POST['id'];
+            $valor = $_POST['valor'];
+            $resultado = Usuario::CamEstVol($id, $valor);
+            echo $resultado;
+            if ($resultado) {
+                echo "correcto";
+            } else {
+                echo "incorrecto";
+            }
+        }
+        break;
+    
+    case 'ActCred':
+        if (isset($_POST['id']) && isset($_POST['institucioncred'])) {
+            $r = Usuario::actualizarCredencial($_POST['id'], $_POST['nombrecred'], $_POST['institucioncred'], $_POST['cargocred']);
+            echo $r;
+        }
+        break;
+
+    case 'CambProf':
+        $r = Usuario::actualizarUsuario($_POST['id'], $_POST['variable'], $_POST['valor']);
+        if ($r) {
+            echo '1correcto';
+        }
+        break;
+
+    case 'CamUs':
+        // Validar que los campos obligatorios estén presentes
+        if (!isset($_POST['tipo'], $_POST['id'], $_POST['camp'], $_POST['valCam'])) {
+            echo '0Faltan datos requeridos.';
+            exit;
+        }
+
+        // Validar y sanitizar entradas
+        $tipo = $_POST['tipo'];
+        $id = $_POST['id'];
+        $camp = $_POST['camp'];
+        $valCam = $_POST['valCam'];
+
+        if (!$id || !$camp || !$valCam) {
+            echo '0Datos inválidos.';
+            exit;
+        }
+
+        $r = false;
+
+
+        $r = Voluntarios::actualizarVol($id, $camp, $valCam);
+
+        // Manejo de respuesta
+        if ($r) {
+            echo '1correcto';
+        } else {
+            echo '0Error al actualizar el dato.';
+        }
+        break;
+
+
     case 'MarAsisVol':
 
         // Validación de los parámetros recibidos
@@ -63,26 +123,27 @@ switch ($_POST['variable']) {
 
         break;
 
-    
+
     case 'CamEstUs':
         $r = Usuario::actualizarUsuario($_POST['id'], $_POST['variable'], $_POST['nuevaClave']);
         if ($r) {
             echo 'correcto';
-        }else{
+        } else {
             echo 'error';
         }
         break;
-    
+    case 'CrearCred':
+        if (isset($_POST['id']) && isset($_POST['institucioncred'])) {
+            $r = Usuario::insertarCredencial($_POST['id'], $_POST['nombrecred'], $_POST['institucioncred'], $_POST['cargocred']);
+            echo $r;
+        }
+        break;
+
     case 'CambClavVol':
         error_log('Caso CambClavVol iniciado');
         if (!isset($_SESSION['UserLog'])) {
             error_log('No autorizado: sesión no iniciada');
-            echo 'No autorizado';
-            exit;
-        }
-        if ($_SESSION['UserLog']->obtener_id()!=$_POST['id']) {
-            error_log('No autorizado: Usuario no corresponde');
-            echo 'No autorizado';
+            echo 'No autorizado: sesión no iniciada';
             exit;
         }
 
@@ -115,7 +176,3 @@ switch ($_POST['variable']) {
         }
         break;
 }
-
-    
-
-?>

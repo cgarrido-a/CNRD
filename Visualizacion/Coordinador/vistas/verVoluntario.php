@@ -35,7 +35,7 @@ function mostrarError($mensaje)
     include_once('../plantillas/DecFin.inc.php');
 }
 
-foreach (glob("../modales/*.php") as $archivo) {
+foreach (glob("../modales-vol/*.php") as $archivo) {
     include_once $archivo;
 
 }
@@ -140,9 +140,9 @@ foreach (glob("../modales/*.php") as $archivo) {
                     <label for="estado">Acción</label>
                     <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
                         <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
-                    <?php 
-                    }
-                    ?>
+                    <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
+                        <strong>Contactar con soporte</strong>
+                   <?php  } ?>
                 </div>
                 <div class="col-md-6 text-center">
 
@@ -151,7 +151,7 @@ foreach (glob("../modales/*.php") as $archivo) {
                             <h5>Credencial</h5>
                             <hr>
                             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Editar credencial</button>
-                            <a class="btn btn-info" target="_blank" href="<?php echo 'MiCredencial.php?id=' . $idVoluntario; ?>">Ver Credencial</a>
+                            <a class="btn btn-info" target="_blank" href="<?php echo 'MiCredencial-vol.php?id=' . $idVoluntario; ?>">Ver Credencial</a>
                         <?php } else { ?>
                             <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Generar credencial</button>
                         <?php } ?>
@@ -213,13 +213,22 @@ function generarImagen($url, $alt, $modalTarget)
 function generarDocumento($label, $url, $modalTarget)
 {
     echo '<p><strong>' . htmlspecialchars($label) . ':</strong><br>';
-    if (!empty($url)) {
-        echo '<a href="' . htmlspecialchars($url) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
+    
+    // Verificar que la URL no está vacía después de limpiar espacios
+    $urlLimpia = trim($url);
+    
+    // Extraer el nombre del archivo y verificar que no esté vacío
+    $nombreArchivo = basename($urlLimpia);
+    
+    if (!empty($urlLimpia) && $nombreArchivo !== '' && strpos($nombreArchivo, '.') !== 0) {
+    echo '<a href="' . htmlspecialchars($urlLimpia) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
     } else {
         echo '<span class="text-danger">No disponible</span>';
     }
-    echo '<button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nuevo Documento</button></p>';
+    
+    echo ' <button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nuevo Documento</button></p>';
 }
+
 
 include_once('../plantillas/DecFin.inc.php');
 ?>
