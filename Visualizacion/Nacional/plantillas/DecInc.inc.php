@@ -60,7 +60,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo 'MiCredencial.php?id=c-' . $_SESSION['user_id'] ?>">Mi Credencial</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'MiCredencial.php?id=' . $_SESSION['user_id'] ?>">Mi Credencial</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">

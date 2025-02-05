@@ -41,12 +41,6 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo $ruta. 'voluntarios.php'; ?>">Voluntarios</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $ruta. 'clinicas.php'; ?>">Clincias</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $ruta. 'usuario.php'; ?>">Usuarios</a>
-                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Asistencia
@@ -60,7 +54,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo 'MiCredencial.php?id=c-' . $_SESSION['user_id'] ?>">Mi Credencial</a>
+                    <a class="nav-link" href="<?php echo $ruta. 'MiCredencial.php?id=' . $_SESSION['user_id'] ?>">Mi Credencial</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">

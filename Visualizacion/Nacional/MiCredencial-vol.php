@@ -259,7 +259,7 @@ $qrImage = base64_encode(ob_get_clean());
 
     <div class="credencial">
         <div class="logo">
-            <img src="img/cnrd.png" alt="Logo CNRD">
+        <img src="../../../img/cnrd.png" alt="Logo CNRD">
         </div>
         <div class="perfil">
             <img src="<?php echo htmlspecialchars($fotoperfil); ?>" alt="Foto de perfil">

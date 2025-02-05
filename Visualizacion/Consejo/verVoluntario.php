@@ -80,19 +80,6 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                     ]); ?>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <h5 class="text-muted">Historial de voluntario</h5>
-                    <hr>
-                    <?php generarDetalle([
-                        'Area de desempeño' => $voluntario->obtener_area_desempeno(),
-                        'Actividades' => $voluntario->obtener_actividades(),
-                        'Experencia en emergencias' => $voluntario->obtener_experiencia_emergencias(),
-                        'Experencia de trabajo con animales' => $voluntario->obtener_experiencia_animales(),
-                        'Experiencia en desastres' => $voluntario->obtener_experiencia_desastres()
-                    ]); ?>
-                </div>
-            </div>
             <!-- Ubicación y Hobbies -->
             <div class="row mt-4">
                 <div class="col-md-6">
@@ -123,47 +110,10 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                 <div class="col-md-6">
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
-                    <?php generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
-                    <hr> 
-                    <?php   generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>
             </div>
         </div>
 
-
-        <div class="card-footer">
-            <div class="row">
-                <div class="col-md-6 text-center">
-                    <h5 class="text-muted">Estado y acciones</h5>
-                    <hr>
-                    <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
-                    <label for="estado">Acción</label>
-                    <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
-                        <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
-                    <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
-                        <strong>Contactar con soporte</strong>
-                   <?php  } ?>
-                </div>
-                <div class="col-md-6 text-center">
-
-                    <?php if ($voluntario->obtener_estado() != 'rechazado') { ?>
-                        <?php if ($credencial) { ?>
-                            <h5>Credencial</h5>
-                            <hr>
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Editar credencial</button>
-                            <a class="btn btn-info" target="_blank" href="<?php echo 'MiCredencial-vol.php?id=' . $idVoluntario; ?>">Ver Credencial</a>
-                        <?php } else { ?>
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Generar credencial</button>
-                        <?php } ?>
-                    <?php } ?>
-                </div>
-            </div>
-            <hr>
-            <div class="col-md-12 text-center">
-                <a href="voluntarios.php" class="btn btn-secondary">Volver</a>
-                <a href="verVoluntario.php?id=<?php echo $idVoluntario + 1; ?>" class="btn btn-secondary">Siguiente</a>
-            </div>
-        </div>
     </div>
 </div>
 
