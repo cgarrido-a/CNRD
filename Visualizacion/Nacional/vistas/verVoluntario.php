@@ -2,12 +2,11 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
-//HAY QUE CORREGIR CON LOS CAMBIOS EN LA BASE DE DATOS
 
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-$ruta= '';
+$ruta = '';
 include_once('../plantillas/DecInc.inc.php');
 
 // Validación de ID del voluntario
@@ -36,7 +35,6 @@ function mostrarError($mensaje)
 
 foreach (glob("../modales-vol/*.php") as $archivo) {
     include_once $archivo;
-
 }
 ?>
 
@@ -53,21 +51,20 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                 <div class="col-md-6">
                     <h5 class="text-muted">Información Personal</h5>
                     <hr>
-                    <?php generarDetalle([
-                        'Nombre Completo' => $voluntario->obtener_nombre(),
-                        'RUT' => $voluntario->obtener_rut(),
-                        'Teléfono' => $voluntario->obtener_telefono(),
-                        'Correo' => $voluntario->obtener_correo()
-                    ]); ?>
                     <div class="form-group mb-3">
-                        <?php
+                        <?php generarDetalle([
+                            'Nombre Completo' => $voluntario->obtener_nombre(),
+                            'RUT' => $voluntario->obtener_rut(),
+                            'Teléfono' => $voluntario->obtener_telefono(),
+                            'Correo' => $voluntario->obtener_correo()
+                        ]); ?>
 
-                        ?>
                         <button type="button" id="btnCambiarClave" class="btn btn-warning">Cambiar Clave</button>
 
                     </div>
                 </div>
                 <div class="col-md-6">
+                    <br>
                     <hr>
                     <?php generarDetalle([
                         'Profesión' => $voluntario->obtener_profesion(),
@@ -123,8 +120,8 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
                     <?php generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
-                    <hr> 
-                    <?php   generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
+                    <hr>
+                    <?php generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>
             </div>
         </div>
@@ -133,15 +130,33 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
         <div class="card-footer">
             <div class="row">
                 <div class="col-md-6 text-center">
-                    <h5 class="text-muted">Estado y acciones</h5>
+                    <h5 class="text-muted">Administrativo</h5>
                     <hr>
-                    <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
-                    <label for="estado">Acción</label>
-                    <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
-                        <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
-                    <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
-                        <strong>Contactar con soporte</strong>
-                   <?php  } ?>
+                    <h6 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?>
+
+                            <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
+                                <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
+                            <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
+                                <strong>Contactar con soporte</strong>
+                            <?php } else { ?>
+                                <button type="button" value="habilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-success">Habilitar</button>
+                                <button type="button" value="rechazado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Rechazar</button>
+                            <?php } ?>
+                        </strong>
+                    </h6>
+                    <p>
+                    <h6 for="tipoUsuario">Tipo de Usuario
+                        <select style="font-size: 1.2rem; padding: 0.5rem 1rem; width: auto; "  id="tipoUsuario" name="tipoUsuario" onchange="Mostrarbtn()">
+                            <option value="Voluntario" <?php echo $voluntario->obtener_TypeUser() == 'Voluntario' ? 'selected' : ''; ?>>Voluntario</option>
+                            <option value="Nacional" <?php echo $voluntario->obtener_TypeUser() == 'Nacional' ? 'selected' : ''; ?>>Nacional</option>
+                            <option value="Coordinador" <?php echo $voluntario->obtener_TypeUser() == 'Coordinador' ? 'selected' : ''; ?>>Coordinador regional</option>
+                            <option value="EqReg" <?php echo $voluntario->obtener_TypeUser() == 'EqReg' ? 'selected' : ''; ?>>Equipo regional</option>
+                        </select>
+                            <button type="button" id="btnConTip" onclick="cambTyUs()" hidden class="btn btn-warning">jh</button>
+                        
+                    </h6>
+
+                    </p>
                 </div>
                 <div class="col-md-6 text-center">
 
@@ -168,14 +183,29 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
 
 <?php
 
-
 // Funciones auxiliares
+function obtenerTipoUsuario($typeUser)
+{
+    switch ($typeUser) {
+        case 'Voluntario':
+            return 'Voluntario';
+        case 'Nacional':
+            return 'Nacional';
+        case 'Coordinador':
+            return 'Coordinador regional';
+        case 'EqReg':
+            return 'Equipo regional';
+        default:
+            return 'Desconocido';
+    }
+}
+
 function generarDetalle($detalles)
 {
     foreach ($detalles as $label => $valor) {
         echo '<p><strong>' . htmlspecialchars($label) . ':</strong> ' . htmlspecialchars($valor) . '</p>';
-        if ( $label === 'Profesión') {
-            ?>
+        if ($label === 'Profesión') {
+?>
             <button type="button" class="btn btn-xs btn-primary" data-bs-toggle="modal" data-bs-target="#modalProfesion">
                 Cambiar Profesión
             </button>
@@ -191,7 +221,7 @@ function generarDetalle($detalles)
                 break;
             case 'Correo':
             ?>
-                <input  type="text" id="Correo" hidden value="<?php echo htmlspecialchars($valor) ?>">
+                <input type="text" id="Correo" hidden value="<?php echo htmlspecialchars($valor) ?>">
                 <button id="btnCambiarCorreo" type="button" class="btn btn-primary" onclick="mostrarModal('Correo')">Cambiar Correo</button>
 <?php
                 break;
@@ -212,19 +242,19 @@ function generarImagen($url, $alt, $modalTarget)
 function generarDocumento($label, $url, $modalTarget)
 {
     echo '<p><strong>' . htmlspecialchars($label) . ':</strong><br>';
-    
+
     // Verificar que la URL no está vacía después de limpiar espacios
     $urlLimpia = trim($url);
-    
+
     // Extraer el nombre del archivo y verificar que no esté vacío
     $nombreArchivo = basename($urlLimpia);
-    
+
     if (!empty($urlLimpia) && $nombreArchivo !== '' && strpos($nombreArchivo, '.') !== 0) {
-    echo '<a href="' . htmlspecialchars($urlLimpia) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
+        echo '<a href="' . htmlspecialchars($urlLimpia) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
     } else {
         echo '<span class="text-danger">No disponible</span>';
     }
-    
+
     echo ' <button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nuevo Documento</button></p>';
 }
 

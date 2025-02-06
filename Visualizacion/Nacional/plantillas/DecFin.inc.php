@@ -32,7 +32,7 @@
                     }
 
                     $.ajax({
-                        url: 'app/pasar.inc.php',
+                        url: '../src/funajax.php',
                         type: 'POST',
                         data: {
                             variable: 'CamUs',
@@ -117,7 +117,7 @@
                             const confirmarClave = document.getElementById('confirmarClave').value;
                             if (nuevaClave === confirmarClave) {
                                 $.ajax({
-                                    url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
+                                    url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                                     type: 'POST',
                                     data: {
                                         variable: 'CambClavVol',
@@ -147,7 +147,7 @@
                     break;
                 case 'Coordinacion':
                 ?>
-                    <script>
+                    <script> 
                         document.getElementById('btnCambiarClave').addEventListener('click', function() {
                             $('#modalClave').modal('show');
                         }); 
@@ -161,7 +161,7 @@
 
                             if (nuevaClave === confirmarClave) {
                                 $.ajax({
-                                    url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
+                                    url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                                     type: 'POST',
                                     data: {
                                         variable: 'CambClavUs',
@@ -193,6 +193,37 @@
        
         case 'verVoluntario.php':
         ?>
+        <script>
+            function Mostrarbtn(){
+                var btncam = document.getElementById('btnConTip')
+                btncam.removeAttribute('hidden')
+            }
+            function cambTyUs(){
+                var valor = document.getElementById('tipoUsuario').value
+                $.ajax({
+                        url: '../src/funajax.php',
+                        type: 'POST',
+                        data: {
+                            variable: 'CamUs',
+                            tipo: 'voluntario',
+                            id: <?php echo $_GET['id'] ?>,
+                            camp: 'TyUs',
+                            valCam: valor,
+                        },
+                        success: function(response) {
+                            console.log(`Respuesta del servidor: ${response}`);
+                            if (response === '1correcto') {
+                                location.reload();
+                            } else {
+                                alert(`Error: ${response}`);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(`Error en la solicitud: ${error}`);
+                        },
+                    });
+            }
+        </script>
         <script>
                 // Función para realizar el cambio
                 function realizarCambio(valor) {

@@ -59,7 +59,6 @@ switch ($_POST['variable']) {
 
         $r = false;
 
-
         $r = Voluntarios::actualizarVol($id, $camp, $valCam);
 
         // Manejo de respuesta

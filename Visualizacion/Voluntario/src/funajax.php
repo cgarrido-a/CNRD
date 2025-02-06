@@ -11,6 +11,39 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 switch ($_POST['variable']) {
+    case 'CamUs':
+        // Validar que los campos obligatorios estén presentes
+        if (!isset($_POST['tipo'], $_POST['id'], $_POST['camp'], $_POST['valCam'])) {
+            echo '0Faltan datos requeridos.';
+            exit;
+        }
+
+        // Validar y sanitizar entradas
+        $tipo = $_POST['tipo'];
+        $id = $_POST['id'];
+        $camp = $_POST['camp'];
+        $valCam = $_POST['valCam'];
+
+        if (!$id || !$camp || !$valCam) {
+            echo '0Datos inválidos.';
+            exit;
+        }
+
+        $r = false;
+
+
+        $r = Voluntarios::actualizarVol($id, $camp, $valCam);
+
+        // Manejo de respuesta
+        if ($r) {
+            echo '1correcto'; 
+        } else {
+            echo '0Error al actualizar el dato.';
+        }
+        break;
+
+
+    
     case 'MarAsisVol':
 
         // Validación de los parámetros recibidos

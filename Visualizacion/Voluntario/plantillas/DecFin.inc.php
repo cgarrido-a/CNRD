@@ -1,6 +1,6 @@
     <!-- Footer -->
     <footer class="bg-light text-center p-3 mt-5">
-        <p>&copy; 2024 Comisión Nacional de Respuesta a Desastres, Colegio Medico Veterinario de Chile Ag. COLMEVET. Todos los derechos reservados.</p>
+        <p>&copy; 2024 Comisión Nacional de Respuesta a Desastres, COLMEVET. Todos los derechos reservados.</p>
     </footer>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
@@ -9,170 +9,9 @@
 
     <?php
     switch (basename($_SERVER['PHP_SELF'])) {
-        case 'asistencia.php':
-    ?>
-            <script>
-                // Crea el elemento video
-                const video = document.createElement("video");
-                // Obtiene el canvas para el escaneo
-                const canvasElement = document.getElementById("qr-canvas");
-                const canvas = canvasElement.getContext("2d");
-                // Variable para indicar si está escaneando
-                let scanning = false;
 
-                // Función para reiniciar QRCode
-                function reiniciarQRCode() {
-                    qrcode.decode(); // Fuerza a decodificar
-                    qrcode.callback = function(response) {}; // Reinicia el callback
-                }
-
-                // Función para encender la cámara
-                const encenderCamara = (variable) => {
-                    // Ocultar los botones de ingreso y salida
-                    document.getElementById("btnINC").style.display = 'none';
-                    document.getElementById("btnCerr").style.display = 'none';
-
-                    var elemt = document.getElementById('accvol');
-                    switch (variable) {
-                        case 'qwert':
-                            elemt.value = 'iniciar';
-                            break;
-                        case 'asdfg':
-                            elemt.value = 'cerrar';
-                            break;
-                    }
-                    navigator.mediaDevices
-                        .getUserMedia({
-                            video: {
-                                facingMode: "environment"
-                            }
-                        })
-                        .then(function(stream) {
-                            scanning = true;
-                            canvasElement.hidden = false;
-                            video.setAttribute("playsinline", true); // Requerido para Safari en iOS
-                            video.srcObject = stream;
-                            video.play();
-                            tick();
-                            reiniciarQRCode(); // Reinicia QRCode antes de comenzar el escaneo
-                            scan();
-                        })
-                        .catch(function(err) {
-                            console.log(err)
-                        });
-                };
-
-                // Actualiza el canvas continuamente mientras escanea
-                function tick() {
-                    canvasElement.height = video.videoHeight;
-                    canvasElement.width = video.videoWidth;
-                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-
-                    scanning && requestAnimationFrame(tick);
-                }
-
-                // Intenta leer el QR y sigue intentando si falla
-                function scan() {
-                    try {
-                        qrcode.decode();
-                    } catch (e) {
-                        setTimeout(scan, 300);
-                    }
-                }
-
-                // Función para detener la cámara
-                const cerrarCamara = () => {
-                    if (video.srcObject) {
-                        video.srcObject.getTracks().forEach((track) => {
-                            track.stop();
-                        });
-                    }
-                    canvasElement.hidden = true;
-                    scanning = false;
-
-                    // Volver a mostrar los botones cuando se detiene la cámara
-                    document.getElementById("btnINC").style.display = 'block';
-                    document.getElementById("btnCerr").style.display = 'block';
-                };
-
-                // Callback cuando se lee correctamente el código QR
-                qrcode.callback = (respuesta) => {
-                    cerrarCamara();
-                    if (respuesta) {
-                        Swal.fire({
-                            icon: 'info', // Cambio a 'info' para un ícono más neutral
-                            title: 'Código QR Detectado',
-                            text: 'Registrando asistencia, por favor espere...',
-                            showConfirmButton: false, // Ocultar el botón de confirmación para evitar interacción
-                            didOpen: () => {
-                                Swal.showLoading(); // Muestra un ícono de carga mientras se procesa
-                            }
-                        });
-
-                        var id = '<?php echo $_SESSION['UserLog']->obtener_id(); ?>';
-                        var accion = document.getElementById('accvol').value;
-
-                        $.ajax({
-                            url: '../src/funajax.php',
-                            type: 'POST',
-                            data: {
-                                variable: 'MarAsisVol',
-                                id: id,
-                                valor: respuesta,
-                                accion: accion
-                            },
-                            success: function(response) {
-                                console.log("Respuesta del servidor:", response);
-
-                                // Si la respuesta es un error, mostrar la alerta de error en lugar de éxito
-                                if (response.includes('Error')) {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error en la Solicitud',
-                                        text: response, // Muestra el mensaje de error recibido del servidor
-                                        showConfirmButton: true,
-                                    });
-                                } else {
-                                    switch (accion) {
-                                        case 'iniciar':
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Ingreso registrado',
-                                                text: response, // Mensaje de éxito si no hay errores
-                                                showConfirmButton: true,
-                                            });
-                                            break;
-                                        case 'cerrar':
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Salida registrada',
-                                                text: response, // Mensaje de éxito si no hay errores
-                                                showConfirmButton: true,
-                                            });
-                                            break;
-                                    }
-
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                var erl = xhr.responseText;
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error en la Solicitud',
-                                    text: 'Error al registrar la asistencia. Intente nuevamente.',
-                                    showConfirmButton: true,
-                                });
-                            }
-                        });
-                    }
-
-                };
-            </script>
-
-        <?php
-            break;
         case 'miperfil.php':
-        ?>
+    ?>
             <script>
                 // Función para realizar el cambio
                 function realizarCambio(valor) {
@@ -182,7 +21,7 @@
                         alert(`Por favor, ingrese el nuevo ${valor}.`);
                         return;
                     }
-
+ 
                     console.log(`Nuevo valor a enviar: ${nuevoValor}`); // Depuración
                     const mensajeError = document.getElementById("mensajeError");
 
@@ -204,7 +43,7 @@
                         },
                         success: function(response) {
                             console.log(`Respuesta del servidor: ${response}`);
-                            if (response === 'correcto') {
+                            if (response === '1correcto') {
                                 location.reload();
                             } else {
                                 alert(`Error: ${response}`);
@@ -260,24 +99,24 @@
                     document.body.dataset.userType = "<?php echo $_SESSION['user_type']; ?>";
                     document.body.dataset.userId = "<?php echo $_SESSION['user_id']; ?>";
                 });
+            </script>
 
-                document.getElementById('btnCambiarClave').addEventListener('click', function() {
+            <script>
+              document.getElementById('btnCambiarClave').addEventListener('click', function() {
                     $('#modalClave').modal('show');
                 });
+
                 document.getElementById('btnCambiarClaveModal').addEventListener('click', function() {
                     const nuevaClave = document.getElementById('nuevaClave').value;
-                    console.log(nuevaClave)
-                    const id = document.getElementById('id_usuario').value;
-                    console.log(id)
+                    const id = "<?php echo $_SESSION['UserLog']->obtener_id(); ?>";
                     const confirmarClave = document.getElementById('confirmarClave').value;
-                    console.log(confirmarClave)
 
                     if (nuevaClave === confirmarClave) {
                         $.ajax({
                             url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                             type: 'POST',
                             data: {
-                                variable: 'CambClavUs',
+                                variable: 'CambClavVol',
                                 id: id,
                                 nuevaClave: nuevaClave
                             },
@@ -297,8 +136,317 @@
                     } else {
                         alert('Las claves no coinciden');
                     }
+
                 });
             </script>
+        <?php
+
+
+            break;
+
+        case 'verVoluntario.php':
+        ?>
+            <script>
+                function Mostrarbtn() {
+                    var btncam = document.getElementById('btnConTip')
+                    btncam.removeAttribute('hidden')
+                }
+
+                function cambTyUs() {
+                    var valor = document.getElementById('tipoUsuario').value
+                    $.ajax({
+                        url: '../src/funajax.php',
+                        type: 'POST',
+                        data: {
+                            variable: 'CamUs',
+                            tipo: 'voluntario',
+                            id: <?php echo $_GET['id'] ?>,
+                            camp: 'TyUs',
+                            valCam: valor,
+                        },
+                        success: function(response) {
+                            console.log(`Respuesta del servidor: ${response}`);
+                            if (response === '1correcto') {
+                                location.reload();
+                            } else {
+                                alert(`Error: ${response}`);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(`Error en la solicitud: ${error}`);
+                        },
+                    });
+                }
+            </script>
+            <script>
+                // Función para realizar el cambio
+                function realizarCambio(valor) {
+                    const nuevoValor = document.getElementById("inp2").value.trim();
+
+                    if (!nuevoValor) {
+                        alert(`Por favor, ingrese el nuevo ${valor}.`);
+                        return;
+                    }
+
+                    console.log(`Nuevo valor a enviar: ${nuevoValor}`); // Depuración
+                    const mensajeError = document.getElementById("mensajeError");
+
+                    // Limpiar cualquier mensaje de error previo
+                    if (mensajeError) {
+                        mensajeError.textContent = "";
+                        mensajeError.style.display = "none";
+                    }
+
+                    $.ajax({
+                        url: '../src/funajax.php',
+                        type: 'POST',
+                        data: {
+                            variable: 'CamUs',
+                            tipo: 'voluntario',
+                            id: <?php echo $_GET['id'] ?>,
+                            camp: valor,
+                            valCam: nuevoValor,
+                        },
+                        success: function(response) {
+                            console.log(`Respuesta del servidor: ${response}`);
+                            if (response === '1correcto') {
+                                location.reload();
+                            } else {
+                                alert(`Error: ${response}`);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(`Error en la solicitud: ${error}`);
+                        },
+                    });
+                }
+
+
+                function mostrarModal(fieldType) {
+                    $('#modalCcambios').modal('show');
+
+                    // Cambiar título del modal
+                    const modalTitle = document.getElementById("modalCambioLabel");
+                    modalTitle.textContent = `Cambiar ${fieldType}`;
+
+                    // Limpiar contenido del modal
+                    const modalBody = document.getElementById("modalCambioBody");
+                    modalBody.innerHTML = "";
+
+                    // Crear elementos del modal
+                    const currentValue = document.createElement("p");
+                    currentValue.id = "inp1";
+                    currentValue.textContent = `El ${fieldType} que deseas cambiar es: ${document.getElementById(fieldType).value}`;
+
+                    const newInput = document.createElement("input");
+                    newInput.type = "text";
+                    newInput.id = "inp2";
+                    newInput.placeholder = `Ingrese su nuevo ${fieldType}`;
+                    newInput.className = "form-control";
+
+                    // Si fieldType es "Correo", agregar advertencia
+                    if (fieldType === "Correo") {
+                        const warningMessage = document.createElement("p");
+                        warningMessage.textContent = "Advertencia: Cambiar el Correo afectará el Usuario de acceso.";
+                        warningMessage.style.color = "red"; // Color rojo para la advertencia
+                        modalBody.appendChild(warningMessage);
+                    }
+
+                    modalBody.append(currentValue, newInput);
+
+                    // Configurar botón de cambio
+                    const btn = document.getElementById("btnCambiarValorModal");
+                    btn.textContent = `Cambiar ${fieldType}`;
+                    btn.onclick = () => realizarCambio(fieldType); // Asigna la función directamente
+                }
+
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.dataset.userType = "<?php echo $_SESSION['user_type']; ?>";
+                    document.body.dataset.userId = "<?php echo $_SESSION['user_id']; ?>";
+                });
+            </script>
+            <script>
+                document.getElementById('btnCambiarClave').addEventListener('click', function() {
+                    $('#modalClave').modal('show');
+                });
+
+                document.getElementById('btnCambiarClaveModal').addEventListener('click', function() {
+                    const nuevaClave = document.getElementById('nuevaClave').value;
+                    const id = "<?php echo $_GET['id'] ?>";
+                    const confirmarClave = document.getElementById('confirmarClave').value;
+
+                    if (nuevaClave === confirmarClave) {
+                        $.ajax({
+                            url: '../src/funajax.php', // El archivo PHP que manejará el guardado
+                            type: 'POST',
+                            data: {
+                                variable: 'CambClavVol',
+                                id: id,
+                                nuevaClave: nuevaClave
+                            },
+                            success: function(response) {
+                                console.log(response)
+                                if (response === 'correcto') {
+                                    location.reload()
+                                } else {
+                                    alert('Error al cambiar clave');
+                                }
+                            },
+                            error: function(response) {
+                                console.log(response)
+                                alert('Hubo un problema al enviar los datos.');
+                            }
+                        });
+                    } else {
+                        alert('Las claves no coinciden');
+                    }
+
+                });
+            </script>
+            <script>
+                function ActCredencial() {
+                    var nombrecred = document.getElementById("nombrecred").value;
+                    var institucioncred = document.getElementById("institucioncred").value;
+                    var cargocred = document.getElementById("cargocred").value;
+
+                    $.ajax({
+                        url: '../src/funajax.php', // El archivo PHP que manejará el guardado
+                        type: 'POST',
+                        data: {
+                            variable: 'ActCred',
+                            id: '<?php echo $_GET['id'] ?>',
+                            nombrecred: nombrecred,
+                            institucioncred: institucioncred,
+                            cargocred: cargocred
+                        },
+                        success: function(response) {
+                            console.log(response)
+                            if (response === 'correcto') {
+                                location.reload()
+                            } else {
+                                alert('Error al crear credencial');
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response)
+                            alert('Hubo un problema al enviar los datos.');
+                        }
+                    });
+                }
+
+                function crearCredencial() {
+                    var nombrecred = document.getElementById("nombrecred").value;
+                    var institucioncred = document.getElementById("institucioncred").value;
+                    var cargocred = document.getElementById("cargocred").value;
+
+                    $.ajax({
+                        url: '../src/funajax.php', // El archivo PHP que manejará el guardado
+                        type: 'POST',
+                        data: {
+                            variable: 'CrearCred',
+                            id: '<?php echo $_GET['id'] ?>',
+                            nombrecred: nombrecred,
+                            institucioncred: institucioncred,
+                            cargocred: cargocred
+                        },
+                        success: function(response) {
+                            console.log(response)
+                            if (response === 'correcto') {
+                                location.reload()
+                            } else {
+                                alert('Error al crear credencial');
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response)
+                            alert('Hubo un problema al enviar los datos.');
+                        }
+                    });
+                }
+
+                function cambiarestado(accion) {
+                    $.ajax({
+                        url: '../src/funajax.php', // El archivo PHP que manejará el guardado
+                        type: 'POST',
+                        data: {
+                            variable: 'CamEstVol',
+                            valor: accion,
+                            id: '<?php echo $_GET['id'] ?>'
+                        },
+                        success: function(response) {
+                            console.log(response)
+                            if (response === '1correcto') {
+                                location.reload()
+                            } else {
+                                alert('Error al actualizar el estado del voluntario');
+                            }
+                        },
+                        error: function() {
+                            alert('Hubo un problema al enviar los datos.');
+                        }
+                    });
+                }
+
+                function cambiarprof() {
+                    var valor2 = document.getElementById('selectProfesion').value;
+                    var accion = valor2 === 'Otra' ?
+                        document.getElementById('otraProfesion').value :
+                        valor2;
+                    console.log(accion)
+
+                    $.ajax({
+                        url: '../src/funajax.php', // El archivo PHP que manejará el guardado
+                        type: 'POST',
+                        data: {
+                            variable: 'CambProf',
+                            valor: accion,
+                            id: '<?php echo $_GET['id'] ?>'
+                        },
+                        success: function(response) {
+                            console.log(response)
+                            if (response === '1correcto') {
+                                location.reload()
+                            } else {
+                                alert('Error al actualizar el estado del voluntario');
+                            }
+                        },
+                        error: function() {
+                            alert('Hubo un problema al enviar los datos.');
+                        }
+                    });
+                }
+
+                function toggleProfesionInput() {
+                    var profesionSelect = document.getElementById('selectProfesion');
+                    var otraProfesionDiv = document.getElementById('otraprof');
+                    if (profesionSelect.value === 'Otra') {
+                        otraProfesionDiv.style.display = 'block';
+                    } else {
+                        otraProfesionDiv.style.display = 'none';
+                    }
+                }
+                $(document).ready(function() {
+                    // Detectar cambios en el select dentro del modal
+                    $('#modalProfesion').on('change', '#selectProfesion', function() {
+                        var profesion = $(this).val(); // Obtener el valor seleccionado
+                        var otraprof = $('#otraprof'); // Contenedor donde se añade el input
+
+                        if (profesion === 'Otra') {
+                            // Agregar input para especificar otra profesión
+                            otraprof.html(`
+                            <input type="text" class="form-control mt-2" id="otraProfesion" 
+                            name="otraProfesion" placeholder="Especifica tu profesión u oficio">
+                        `);
+                        } else {
+                            // Limpiar el contenedor si no es "Otra"
+                            otraprof.empty();
+                        }
+                        console.log('Profesión seleccionada:', profesion);
+                    });
+                });
+            </script>
+
     <?php
             break;
     }

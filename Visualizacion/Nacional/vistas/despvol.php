@@ -10,11 +10,26 @@ session_start();
 $ruta = '';
 include_once('../plantillas/DecInc.inc.php');
 $resultados = Voluntarios::obtenervoluntariosdesplegados();
+$regiones = Usuario::obtener_regiones();
+
 
 ?>
 <div class="container mt-5">
     <h2>Voluntarios Desplegados</h2>
+    <!-- Filtros -->
+    <div class="row g-3 mb-3">
 
+        <div class="col-md">
+            <select id="filtroRegion" class="form-select">
+                <?php
+                foreach ($regiones as $region) {
+                    echo "<option value='" . $region['id'] . "'>" . $region['nombre'] . "</option>";
+                }
+                ?>
+            </select>
+        </div>
+
+    </div>
     <table class="table table-striped table-bordered mt-3">
         <thead class="table-dark">
             <tr>
@@ -23,47 +38,65 @@ $resultados = Voluntarios::obtenervoluntariosdesplegados();
                 <th>Casos alergia alimentaria</th>
             </tr>
         </thead>
-        <tbody>
-            <?php
-
-            $totalVoluntarios = 0;
-            foreach ($resultados as $ubicacion => $infoUbicacion) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($infoUbicacion['nombre']) . "</td>"; // Mostrar el nombre
-                echo "<td>";
-                echo "<ul>";
-                foreach ($infoUbicacion['tipos_alimentacion'] as $tipo => $cantidad) {
-                    $totalVoluntarios += $cantidad; // Sumar al total
-                    echo "<li>" . htmlspecialchars($tipo) . ": " . htmlspecialchars($cantidad) . "</li>";
-                }
-                echo "</ul>";
-                echo "</td>";
-                echo "<td>";
-                if (!empty($infoUbicacion['voluntarios_con_enfermedades'])) {
-                    echo "<ul>";
-                    foreach ($infoUbicacion['voluntarios_con_enfermedades'] as $voluntario) {
-                        echo "<li>" . htmlspecialchars($voluntario) . "</li>";
-                    }
-                    echo "</ul>";
-                } else {
-                    echo "Ninguno";
-                }
-                echo "</td>";
-                echo "</tr>";
-            }
-            ?>
-        <tfoot>
-            <?php
-            echo "<tr><td colspan='3'><strong>Total Voluntarios: $totalVoluntarios</strong></td></tr>";
-            ?>
+        <tbody id="tablaVoluntarios">
+            
+        <tfoot id="totalVoluntarios">
+            
         </tfoot>
         </tbody>
     </table>
 </div>
+<script id="data-ubicaciones" type="application/json">
+    <?php echo json_encode($resultados); ?>
+</script>
 
 <script>
-    let ubicaciones = <?php echo json_encode($resultados); ?>;
-    console.log(ubicaciones)
+document.addEventListener("DOMContentLoaded", function () {
+    let dataElement = document.getElementById("data-ubicaciones");
+    if (!dataElement) {
+        console.error("Error: No se encontró el elemento con id 'data-ubicaciones'");
+        return;
+    }
+
+    let ubicaciones = JSON.parse(dataElement.textContent);
+    let filtroRegion = document.getElementById("filtroRegion");
+    let tbody = document.getElementById("tablaVoluntarios");
+    let totalVoluntariosElemento = document.getElementById("totalVoluntarios");
+
+    if (!tbody || !filtroRegion || !totalVoluntariosElemento) {
+        console.error("Error: Faltan elementos en el DOM.");
+        return;
+    }
+
+    function filtrarTabla() {
+        let regionSeleccionada = filtroRegion.value;
+        tbody.innerHTML = "";
+        let totalVoluntarios = 0;
+
+        Object.entries(ubicaciones).forEach(([direccion, infoUbicacion]) => {
+            if (regionSeleccionada === "" || infoUbicacion.id_region == regionSeleccionada) {
+                let fila = document.createElement("tr");
+                fila.innerHTML = `
+                    <td>${infoUbicacion.nombre}</td>
+                    <td><ul>${Object.entries(infoUbicacion.tipos_alimentacion).map(([tipo, cantidad]) => {
+                        totalVoluntarios += cantidad;
+                        return `<li>${tipo}: ${cantidad}</li>`;
+                    }).join("")}</ul></td>
+                    <td>${infoUbicacion.voluntarios_con_enfermedades.length > 0 ?
+                        `<ul>${infoUbicacion.voluntarios_con_enfermedades.map(v => `<li>${v}</li>`).join("")}</ul>`
+                        : "Ninguno"}</td>
+                `;
+                tbody.appendChild(fila);
+            }
+        });
+        totalVoluntariosElemento.textContent = `Total Voluntarios: ${totalVoluntarios}`;
+    }
+
+    filtroRegion.addEventListener("change", filtrarTabla);
+    filtrarTabla(); // Aplicar filtro inicial
+});
+
+
 </script>
 <?php
 include_once('../plantillas/DecFin.inc.php');

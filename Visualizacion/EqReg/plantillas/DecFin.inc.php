@@ -32,7 +32,7 @@
                     }
 
                     $.ajax({
-                        url: 'app/pasar.inc.php',
+                        url: '../src/funajax.php',
                         type: 'POST',
                         data: {
                             variable: 'CamUs',
@@ -117,7 +117,7 @@
                             const confirmarClave = document.getElementById('confirmarClave').value;
                             if (nuevaClave === confirmarClave) {
                                 $.ajax({
-                                    url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
+                                    url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                                     type: 'POST',
                                     data: {
                                         variable: 'CambClavVol',
@@ -161,7 +161,7 @@
 
                             if (nuevaClave === confirmarClave) {
                                 $.ajax({
-                                    url: 'app/pasar.inc.php', // El archivo PHP que manejará el guardado
+                                    url: '../src/funajax.php', // El archivo PHP que manejará el guardado
                                     type: 'POST',
                                     data: {
                                         variable: 'CambClavUs',

@@ -313,6 +313,30 @@ class Usuario
             return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
         }
     }
+    public static function listarconsejos_cor($region){
+        $regiones = [];
+        $conexion = Database::connect();
+        try {
+            $sql = "SELECT * FROM consejos WHERE region_id = :region_id";
+            $sentencia = $conexion->prepare($sql);
+            $sentencia->bindParam(':region_id', $region);
+            $sentencia->execute();
+            $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+            if (count($resultado)) {
+                foreach ($resultado as $fila) {
+                    if ($fila['Region'] != 'Nacional') {
+                        $regiones[] = [
+                            "id" => htmlspecialchars($fila["ID"]),
+                            "nombre" => htmlspecialchars($fila["Region"])
+                        ];
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
+        }
+        return $regiones;
+    }
 
 
 
@@ -938,6 +962,13 @@ class Voluntarios
 
         try {
             switch ($campo) {
+                case 'TyUs':
+                    $sql = "UPDATE voluntarios SET TypeUser = :rutaArchivo WHERE id = :idVoluntario";
+                    $claveEncriptada = $rutaArchivo;
+                    if ($_SESSION['UserLog']->obtener_id() === $idVoluntario) {
+                        $_SESSION['UserLog']->cambiar_TypeUser($claveEncriptada);
+                    }
+                    break;
                 case 'CamEstUs':
                     $sql = "UPDATE voluntarios SET estado = :rutaArchivo WHERE id = :idVoluntario";
                     $claveEncriptada = $rutaArchivo;

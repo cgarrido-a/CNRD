@@ -2,89 +2,85 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
-
+//HAY QUE CORREGIR CON LOS CAMBIOS EN LA BASE DE DATOS
 
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-if (!isset($_SESSION['user_type'])) {
-    header('Location: login.html'); // Redirige al login si no hay sesión activa
-    exit();
-}
-
-
-$ruta ='';
-
+$ruta = '';
 include_once('../plantillas/DecInc.inc.php');
-
+echo $_SESSION['UserLog']->obtener_TypeUser();
 foreach (glob("../modales/*.php") as $archivo) {
     include_once $archivo;
-
 }
 ?>
-<div class="container mt-5">
-    <h1 class="mb-4">Mi Perfil</h1>
+<div class="container mt-4">
+    <h1 class="mb-5 text-center text-primary">Mi Perfil</h1>
 
-    <div class="card">
+    <div class="card shadow-lg border-light">
         <div class="card-body">
-            <form>
-                <!-- Foto de perfil -->
-                <div class="form-group mb-3">
-                    <label for="fotoPerfil">Foto de Perfil</label><br>
-                    <img src="<?php echo $_SESSION['UserLog']->obtener_fotoperfil(); ?>" alt="Foto de perfil" class="img-thumbnail" width="100"><br>
-                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalFotoPerfil">Subir Nueva Foto</button>
+            <div class="row">
+                <!-- Columna para la Foto de Perfil -->
+                <div class="col-md-4 text-center mb-4">
+                    <label for="fotoPerfil" class="h5 font-weight-bold">Foto de Perfil</label><br>
+                    <img src="<?php echo htmlspecialchars($_SESSION['UserLog']->obtener_Fotoperfil()); ?>" alt="Foto de perfil" class="img-fluid rounded-circle" style="width: 220px; height: 220px; object-fit: cover;"><br>
+                    <button type="button" class="btn btn-info mt-3" data-toggle="modal" data-target="#modalFotoPerfil">Subir Nueva Foto</button>
                 </div>
 
-                <!-- Nombre -->
-                <div class="form-group mb-3">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_nombre(); ?>" readonly>
+                <!-- Columna para los Datos del Usuario -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <!-- Nombre -->
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="font-weight-bold"><strong>Nombre</strong></label>
+                            <p id="nombre" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_nombre()); ?></p>
+                        </div>
+
+                        <!-- Celular -->
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="font-weight-bold"><strong>Teléfono</strong></label>
+                            <p id="Telefono" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_telefono()); ?></p>
+                            <button id="btnCambiarTelefono" type="button" class="btn btn-outline-primary mt-2" onclick="mostrarModal('Telefono')">Cambiar Teléfono</button>
+                        </div>
+
+                        <!-- Correo -->
+                        <div class="col-md-6 mb-3">
+                            <label for="correo" class="font-weight-bold"><strong> Correo</strong> </label>
+                            <p id="Correo" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_correo()); ?></p>
+                            <button id="btnCambiarCorreo" type="button" class="btn btn-outline-primary mt-2" onclick="mostrarModal('Correo')">Cambiar Correo</button>
+                            <p style="color: red;">Importante corresponde al usuario de acceso</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="btnCambiarClave" class="font-weight-bold"><strong>Clave</strong></label>
+                            <button type="button" id="btnCambiarClave" class="btn btn-warning btn-block">Cambiar Clave</button>
+                        </div>
+
+                        <!-- Región -->
+                        <div class="col-md-6 mb-3">
+                            <label for="region" class="font-weight-bold"><strong>Región</strong></label>
+                            <p id="region" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_region()); ?></p>
+                        </div>
+
+                        <!-- Comuna -->
+                        <div class="col-md-6 mb-3">
+                            <label for="consejoRegional" class="font-weight-bold"><strong>Comuna</strong></label>
+                            <p id="consejoRegional" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_comuna()); ?></p>
+                        </div>
+
+
+                    </div>
                 </div>
-
-                <!-- Celular -->
-                <div class="form-group mb-3">
-                    <label for="nombre">Telefono</label>
-                    <input type="text" id="Telefono" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_telefono(); ?>" readonly>
-                    <button id="btnCambiarTelefono" type="button" class="btn btn-primary" onclick="mostrarModal('Telefono')">Cambiar Teléfono</button>
-                </div>
-
-                <!-- Correo -->
-                <div class="form-group mb-3">
-                    <label for="correo">Correo</label>
-                    <input type="email" id="Correo" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_correo(); ?>" readonly>
-
-                    <button id="btnCambiarCorreo" type="button" class="btn btn-primary" onclick="mostrarModal('Correo')">Cambiar Correo</button>
-                </div>
-
-                <!-- Clave -->
-                <div class="form-group mb-3">
-                    <label for="btnCambiarClave">Clave</label>
-                    <button type="button" id="btnCambiarClave" class="btn btn-warning">Cambiar Clave</button>
-
-                </div>
-
-                <!-- Región -->
-                <div class="form-group mb-3">
-                    <label for="region">Región</label>
-                    <input type="text" id="region" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_region(); ?>" readonly>
-                </div>
-
-                <!-- Consejo Regional -->
-                <div class="form-group mb-3">
-                    <label for="consejoRegional">Comuna</label>
-                    <input type="text" id="consejoRegional" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_comuna(); ?>" readonly>
-                </div>
-
-                <!-- Estado -->
-                <div class="form-group mb-3">
-                    <label for="estado">Estado</label>
-                    <input type="text" id="estado" class="form-control" value="<?php echo $_SESSION['UserLog']->obtener_estado(); ?>" readonly>
-                </div>
-
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+
 <?php
-include_once('../plantillas/DecFin.inc.php');
+// Incluir pie de página (DecFin.inc.php)
+if (file_exists('../plantillas/DecFin.inc.php')) {
+    include_once('../plantillas/DecFin.inc.php');
+} else {
+    die('Error: No se encuentra el archivo DecFin.inc.php.');
+}
 ?>

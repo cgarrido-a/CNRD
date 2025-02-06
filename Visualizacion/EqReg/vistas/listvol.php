@@ -25,7 +25,7 @@ class PDF extends FPDF {
         $this->SetY(15); // Ajusta la posición para evitar que el título se superponga con el logo
         $this->SetFont('Arial', 'B', 16);
         $this->Cell(0, 10, utf8_decode('Listado de Voluntarios Habilitados'), 0, 1, 'C');
-        $this->Ln(18);
+        $this->Ln(20);
     }
 
     function Footer() {
@@ -37,7 +37,8 @@ class PDF extends FPDF {
 
 $pdf = new PDF();
 $pdf->AliasNbPages();
-$pdf->AddPage('L'); // Orientación horizontal
+    $pdf->AddPage('L'); 
+    $pdf->SetAutoPageBreak(true,15);  
 $pdf->SetFont('Arial', 'B', 10);
 
 // Encabezados de la tabla (sin la columna ID)

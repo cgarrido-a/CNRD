@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-$ruta= '';
+$ruta = '';
 include_once('../plantillas/DecInc.inc.php');
 $voluntarios = Voluntarios::obtenerVoluntarios();
 
@@ -19,7 +19,8 @@ if (count($voluntarios)) {
             "id" => $voluntario->obtener_id(),
             "nombre" => $voluntario->obtener_nombre(),
             "telefono" => $voluntario->obtener_telefono(),
-            "region" => $voluntario->obtener_id_region(), //devuelve el nombre de la region
+            "nombre_region" => $voluntario->obtener_id_region(),
+            "region" => $voluntario->obtener_region(), //devuelve el nombre de la region
             "comuna" => $voluntario->obtener_comuna(),
             "estado" => $voluntario->obtener_estado(),
             "profesion" => $voluntario->obtener_profesion(),
@@ -46,9 +47,25 @@ if (count($voluntarios)) {
                 <option value="Voluntario General">Voluntario General</option>
             </select>
         </div>
-        
-           
-        
+
+        <div class="col-md" hidden>
+            <select id="filtroRegion" class="form-select" onchange="filtrarTabla('1')">
+                <option value="">Región</option>
+                <?php
+                foreach ($regiones as $region) {
+                    echo "<option value='" . $region['id'] . "'>" . $region['nombre'] . "</option>";
+                }
+                ?>
+            </select>
+        </div>
+        <div class="col-md" hidden>
+            <select id="filtroAutorizado" class="form-select" onchange="filtrarTabla('1')">
+                <option value="">Estado</option>
+                <option value="habilitado">Habilitado</option>
+                <option value="deshabilitado">Deshabilitado</option>
+            </select>
+        </div>
+
     </div>
 
     <!-- Tabla de Voluntarios -->
@@ -59,6 +76,7 @@ if (count($voluntarios)) {
                 <th>Región</th>
                 <th>Telefono</th>
                 <th>Tipo</th>
+                <th>Autorizado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -85,25 +103,29 @@ if (count($voluntarios)) {
     }
     let voluntarios = <?php echo json_encode($vols); ?>;
     voluntarios.forEach(voluntario => {
-        voluntario.region = decodeHTML(voluntario.region);
+        voluntario.nombre_region = decodeHTML(voluntario.nombre_region);
     });
 
+    console.log(voluntarios)
     let currentPage = 1; // Página actual
     const rowsPerPage = 25; // Número de filas por página
 
     // Función para filtrar los voluntarios
     function filtrarTabla(pagina) {
-        if(!pagina){
-            currentPage=1
+        if (!pagina) {
+            currentPage = 1
         }
         const filtroNombre = document.getElementById("filtroNombre").value.toLowerCase();
         const filtroTipo = document.getElementById("filtroTipo").value;
+        const filtroAutorizado = document.getElementById("filtroAutorizado").value;
         // Filtrar voluntarios
+        const filtroRegion = document.getElementById("filtroRegion").value;
         const voluntariosFiltrados = voluntarios.filter(voluntario => {
             return (
                 (!filtroNombre ||
                     voluntario.nombre.toLowerCase().includes(filtroNombre) ||
                     voluntario.telefono.toLowerCase().includes(filtroNombre)) &&
+                (!filtroRegion || voluntario.region === filtroRegion) &&
                 (
                     !filtroTipo ||
                     (filtroTipo === "Voluntario General" ?
@@ -112,17 +134,18 @@ if (count($voluntarios)) {
                             "Medico Veterinario", "Tecnico Veterinario"
                         ].includes(voluntario.profesion) :
                         voluntario.profesion === filtroTipo)
-                ) 
+                ) &&
+                (!filtroAutorizado || voluntario.estado === filtroAutorizado)
             );
         });
 
-       
+
         mostrarTabla(voluntariosFiltrados);
         generarPaginador(voluntariosFiltrados);
     }
 
     // Función para mostrar la tabla de voluntarios
-    function mostrarTabla(voluntariosFiltrados) { 
+    function mostrarTabla(voluntariosFiltrados) {
         const tabla = document.getElementById("tablaVoluntarios").getElementsByTagName('tbody')[0];
         tabla.innerHTML = ''; // Limpiar tabla
 
@@ -136,7 +159,7 @@ if (count($voluntarios)) {
             const fila = document.createElement("tr");
             fila.innerHTML = `
             <td>${voluntario.nombre}</td>
-            <td>${voluntario.region}-${voluntario.comuna}</td>
+            <td>${voluntario.nombre_region}-${voluntario.comuna}</td>
             <td>${voluntario.telefono}</td>
             <td>${voluntario.profesion}</td>
             <td>${voluntario.estado}</td>
