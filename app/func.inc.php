@@ -203,7 +203,7 @@ class Usuario
             case 'voluntario':
                 $query = "SELECT v.ID, v.clave, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS 
                             nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
-                            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
+                            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, r.ID as id_region2, 
                             v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
                             v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser 
                             FROM voluntarios v JOIN regiones r ON v.id_region = r.ID WHERE v.correo = :email";
@@ -261,7 +261,8 @@ class Usuario
                             htmlspecialchars($user['Telefono']),
                             htmlspecialchars($user['Correo']),
                             htmlspecialchars($user['Profesion']),
-                            htmlspecialchars($user['nombre_region']),
+                            htmlspecialchars($user['nombre_region']), // Entrega la id
+                            htmlspecialchars($user['id_region2']), // Entrega el nombre de la region
                             htmlspecialchars($user['Comuna']),
                             htmlspecialchars($user['Experiencia_voluntario']),
                             htmlspecialchars($user['Experiencia_otra_emergencia']),
@@ -599,8 +600,6 @@ class Usuario
             return false;
         }
     }
-
-
     public static function obtenerUsuariosId($id)
     {
         // Iniciar sesión si no está iniciada
@@ -644,94 +643,129 @@ class Usuario
             $conexion = null;
         }
     }
-
-    public static function obtenerUsuarios() // Reformula a consejo
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Conexión a la base de datos
-        $conexion = Database::connect();
-        if (!$conexion) {
-            die('Error de conexión a la base de datos');
-        }
-
-        $usuarios = [];
-        try {
-            if ($_SESSION['region'] != 'Nacional') {
-                $sql = "SELECT * FROM usuarios WHERE region = :region";
-                $sentencia = $conexion->prepare($sql);
-                $sentencia->bindParam(':region', $_SESSION['region'], PDO::PARAM_STR);
-            } else {
-                $sql = "SELECT * FROM usuarios";
-                $sentencia = $conexion->prepare($sql);
-            }
-
-
-            $sentencia->execute();
-
-            $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($resultado as $fila) {
-                $usuarios[] = [
-                    "id" => htmlspecialchars($fila["id_usuario"]),
-                    "nombre" => htmlspecialchars($fila["nombre"]),
-                    "correo" => htmlspecialchars($fila["correo"]),
-                    "region" => htmlspecialchars($fila["region"]),
-                    "consejo" => $fila["consejo_regional"],
-                    "estado" => htmlspecialchars($fila["estado"]) === "habilitado" ? "habilitado" : "deshabilitado"
-                ];
-            }
-        } catch (PDOException $ex) {
-            error_log("Error al obtener usuarios: " . $ex->getMessage());
-        }
-
-        $conexion = null;
-
-
-        return $usuarios;
-    }
-
-    // Reformular
-    public static function guardarUsuario($nombre, $correo, $clave, $region, $consejo)
-    {
-        // Conectar a la base de datos
-        $pdo = Database::connect();
-
-        // Encriptar la clave
-        $clave_encriptada = password_hash($clave, PASSWORD_DEFAULT);
-
-        // Preparar la consulta SQL para insertar el nuevo usuario
-        $sql = "INSERT INTO usuarios (nombre, correo, clave, region, consejo_regional, estado)
-                VALUES (:nombre, :correo, :clave, :region, :consejo, 'habilitado')";
-
-        try {
-            // Preparar la declaración
-            $stmt = $pdo->prepare($sql);
-
-            // Vincular los parámetros
-            $stmt->bindParam(':nombre', $nombre);
-            $stmt->bindParam(':correo', $correo);
-            $stmt->bindParam(':clave', $clave_encriptada);
-            $stmt->bindParam(':region', $region);
-            $stmt->bindParam(':consejo', $consejo);
-
-            // Ejecutar la consulta
-            $stmt->execute();
-
-            // Retornar éxito
-            return 'Usuario creado exitosamente.';
-        } catch (PDOException $e) {
-            // Manejar errores de ejecución
-            return 'Error al guardar el usuario: ' . $e->getMessage();
-        }
-    }
 }
-
 
 class Voluntarios
 {
+    public static function obtenervoluntariosdesplegados()
+    {
+        $conexion = Database::connect();
+        $datos = [];
+
+        // Obtener la región desde la sesión
+        $id_region = $_SESSION['UserLog']->obtener_id_region();
+
+        try {
+
+
+            if ($_SESSION['UserLog']->obtener_TypeUser() != 'Nacional') {
+                $sql = "SELECT 
+                ubicaciones.id_region AS id_region,
+                ubicaciones.nombre AS nombre,
+                ubicaciones.Direccion AS ubicacion,
+                voluntarios.tipo_alimentacion AS alimentacion,
+                COUNT(voluntarios.id) AS total,
+                GROUP_CONCAT(DISTINCT CASE 
+                    WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
+                    AND TRIM(voluntarios.enfermedades_cronicas) != '' 
+                    AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
+                    THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
+                    ELSE NULL END 
+                SEPARATOR ', ') AS voluntarios_con_enfermedades
+            FROM 
+                asistencia
+            INNER JOIN 
+                ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
+            INNER JOIN 
+                voluntarios ON asistencia.id_voluntario = voluntarios.id
+            WHERE 
+                ubicaciones.id_region = :id_region
+            GROUP BY 
+                ubicaciones.Direccion, voluntarios.tipo_alimentacion
+            ORDER BY 
+                ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
+
+                $stmt = $conexion->prepare($sql);
+
+                // Vincular el parámetro :id_region con el valor obtenido de la sesión
+                $stmt->bindParam(':id_region', $id_region, PDO::PARAM_INT);
+            } else {
+                $sql = "SELECT 
+                ubicaciones.id_region AS id_region,
+                ubicaciones.nombre AS nombre,
+                ubicaciones.Direccion AS ubicacion,
+                voluntarios.tipo_alimentacion AS alimentacion,
+                COUNT(voluntarios.id) AS total,
+                GROUP_CONCAT(DISTINCT CASE 
+                    WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
+                    AND TRIM(voluntarios.enfermedades_cronicas) != '' 
+                    AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
+                    THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
+                    ELSE NULL END 
+                SEPARATOR ', ') AS voluntarios_con_enfermedades
+            FROM 
+                asistencia
+            INNER JOIN 
+                ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
+            INNER JOIN 
+                voluntarios ON asistencia.id_voluntario = voluntarios.id
+                
+            GROUP BY 
+                ubicaciones.Direccion, voluntarios.tipo_alimentacion
+            ORDER BY 
+                ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
+
+                $stmt = $conexion->prepare($sql);
+            }
+
+
+            $stmt->execute();
+
+            // Obtener resultados con fetchAll
+            $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (count($resultado)) {
+                // Organizar los datos por ubicación
+                foreach ($resultado as $fila) {
+                    $id_region = $fila['id_region'];
+                    $nombre = $fila['nombre'];
+                    $ubicacion = $fila['ubicacion'];
+                    $alimentacion = $fila['alimentacion'];
+                    $total = $fila['total'];
+                    $voluntarios_con_enfermedades = $fila['voluntarios_con_enfermedades'];
+
+                    // Asegurarse de inicializar la ubicación si no existe
+                    if (!isset($datos[$ubicacion])) {
+                        $datos[$ubicacion] = [
+                            'tipos_alimentacion' => [], // Almacena tipos de alimentación
+                            'nombre' => $nombre,
+                            'id_region' => $id_region,
+                            'voluntarios_con_enfermedades' => [] // Almacena los nombres y enfermedades de los voluntarios
+                        ];
+                    }
+
+                    // Agregar tipo de alimentación y su cantidad
+                    $datos[$ubicacion]['tipos_alimentacion'][$alimentacion] = $total;
+
+                    // Agregar nombres y enfermedades de los voluntarios con enfermedades crónicas
+                    if (!empty($voluntarios_con_enfermedades)) {
+                        $datos[$ubicacion]['voluntarios_con_enfermedades'] = explode(', ', $voluntarios_con_enfermedades);
+                    }
+                }
+            }
+        } catch (PDOException $ex) {
+            error_log("Error al obtener voluntarios desplegados: " . $ex->getMessage());
+            print "Error al obtener voluntarios desplegados: " . $ex->getMessage();
+        }
+
+        // Retorna el arreglo organizado
+        return $datos;
+    }
+
+
+
+
+
     public static function ObtenerCertificados($id)
     {
         $conexion = Database::connect();
@@ -768,7 +802,7 @@ class Voluntarios
                             nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia, 
                             v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, 
                             v.Actividades, v.Area_desempeno, v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, 
-                            v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser
+                            v.Certificado_titulo, v.id_region, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser
                             FROM voluntarios v JOIN regiones r ON v.id_region = r.ID
                             WHERE v.ID = :id";
             $stmt = $pdo->prepare($sql);
@@ -785,6 +819,7 @@ class Voluntarios
                     htmlspecialchars($resultado['Telefono']),
                     htmlspecialchars($resultado['Correo']),
                     htmlspecialchars($resultado['Profesion']),
+                    htmlspecialchars($resultado['id_region']),
                     htmlspecialchars($resultado['nombre_region']),
                     htmlspecialchars($resultado['Comuna']),
                     htmlspecialchars($resultado['Experiencia_voluntario']),
@@ -819,12 +854,37 @@ class Voluntarios
         // Conexión a la base de datos
         $conexion = Database::connect();
         try {
-            $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, v.Comuna, v.Experiencia_voluntario, v.Experiencia_otra_emergencia,
-            v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, v.Experiencia_emergencias,
-            v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, v.TypeUser
-            FROM voluntarios v JOIN regiones r ON v.id_region = r.ID";
 
-            $sentencia = $conexion->prepare($sql);
+
+            include_once('class.inc.php');
+
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if ($_SESSION['UserLog']->obtener_TypeUser() != 'Nacional') {
+                $sql2 = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, r.ID AS id_region2, v.Comuna, v.Experiencia_voluntario, 
+                        v.Experiencia_otra_emergencia, v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, 
+                        v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, 
+                        v.TypeUser 
+                        FROM voluntarios v 
+                        JOIN regiones r ON v.id_region = r.ID 
+                        WHERE r.ID = :id_region";
+
+                $sentencia = $conexion->prepare($sql2);
+                $DF = $_SESSION['UserLog']->obtener_id_region();
+                $sentencia->bindParam(':id_region', $DF, PDO::PARAM_STR);
+            } else {
+                $sql = "SELECT v.ID, v.nombre, v.RUT, v.Telefono, v.Correo, v.Profesion, r.Region AS nombre_region, r.ID AS id_region2, v.Comuna, v.Experiencia_voluntario, 
+            v.Experiencia_otra_emergencia, v.Recursos_propios, v.Hobbys, v.Tipo_alimentacion, v.Grupo_sanguineo, v.Enfermedades_cronicas, v.Actividades, v.Area_desempeno, 
+            v.Experiencia_emergencias, v.Experiencia_animales, v.Experiencia_desastres, v.Certificado_titulo, v.Estado, v.Fecha_registro, v.Fotoperfil, v.CertificadoAntecedentes, 
+            v.TypeUser 
+            FROM voluntarios v 
+            JOIN regiones r ON v.id_region = r.ID;";
+                $sentencia = $conexion->prepare($sql);
+            }
+
+
             $sentencia->execute(); // Ejecutar la consulta
             $fila = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 
@@ -838,6 +898,7 @@ class Voluntarios
                         htmlspecialchars($resultado['Telefono']),
                         htmlspecialchars($resultado['Correo']),
                         htmlspecialchars($resultado['Profesion']),
+                        htmlspecialchars($resultado['id_region2']),
                         htmlspecialchars($resultado['nombre_region']),
                         htmlspecialchars($resultado['Comuna']),
                         htmlspecialchars($resultado['Experiencia_voluntario']),
@@ -862,7 +923,7 @@ class Voluntarios
                 }
             }
         } catch (PDOException $ex) {
-            echo '<script>alert("'.$ex->getMessage().'")</script>';
+            echo '<script>alert("' . $ex->getMessage() . '")</script>';
             error_log("Error al obtener voluntarios: " . $ex->getMessage());
         }
 

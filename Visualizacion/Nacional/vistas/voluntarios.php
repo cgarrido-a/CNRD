@@ -47,7 +47,22 @@ if (count($voluntarios)) {
             </select>
         </div>
         
-           
+            <div class="col-md">
+                <select id="filtroRegion" class="form-select" onchange="filtrarTabla('1')">
+                    <?php
+                    foreach ($regiones as $region) {
+                        echo "<option value='" . $region['Region'] . "'>" . $region['Region'] . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="col-md">
+                <select id="filtroAutorizado" class="form-select" onchange="filtrarTabla('1')">
+                    <option value="">Estado</option>
+                    <option value="habilitado">Habilitado</option>
+                    <option value="deshabilitado">Deshabilitado</option>
+                </select>
+            </div>
         
     </div>
 
@@ -59,6 +74,7 @@ if (count($voluntarios)) {
                 <th>Región</th>
                 <th>Telefono</th>
                 <th>Tipo</th>
+                <th>Autorizado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -98,12 +114,15 @@ if (count($voluntarios)) {
         }
         const filtroNombre = document.getElementById("filtroNombre").value.toLowerCase();
         const filtroTipo = document.getElementById("filtroTipo").value;
+        const filtroAutorizado = document.getElementById("filtroAutorizado").value;
         // Filtrar voluntarios
+        const filtroRegion = document.getElementById("filtroRegion").value;
         const voluntariosFiltrados = voluntarios.filter(voluntario => {
             return (
                 (!filtroNombre ||
                     voluntario.nombre.toLowerCase().includes(filtroNombre) ||
                     voluntario.telefono.toLowerCase().includes(filtroNombre)) &&
+                (!filtroRegion || voluntario.region === filtroRegion) &&
                 (
                     !filtroTipo ||
                     (filtroTipo === "Voluntario General" ?
@@ -112,7 +131,8 @@ if (count($voluntarios)) {
                             "Medico Veterinario", "Tecnico Veterinario"
                         ].includes(voluntario.profesion) :
                         voluntario.profesion === filtroTipo)
-                ) 
+                ) &&
+                (!filtroAutorizado || voluntario.estado === filtroAutorizado)
             );
         });
 

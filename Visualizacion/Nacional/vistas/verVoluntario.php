@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
-$ruta = '';
+$ruta= '';
 include_once('../plantillas/DecInc.inc.php');
 
 // Validación de ID del voluntario
@@ -28,7 +28,6 @@ if (!$voluntario) {
 
 $institucion = 'CNRD ' . $voluntario->obtener_id_region();
 
-// Función para mostrar mensajes de error
 function mostrarError($mensaje)
 {
     echo '<div class="alert alert-danger text-center mt-5">' . htmlspecialchars($mensaje) . '</div>';
@@ -37,6 +36,7 @@ function mostrarError($mensaje)
 
 foreach (glob("../modales-vol/*.php") as $archivo) {
     include_once $archivo;
+
 }
 ?>
 
@@ -123,8 +123,8 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                     <h5 class="text-muted">Documentos</h5>
                     <hr>
                     <?php generarDocumento('Certificado de Título', $voluntario->obtener_certificado_titulo(), '#modalCertificadoTitulo'); ?>
-                    <hr>
-                    <?php generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
+                    <hr> 
+                    <?php   generarDocumento('Certificado de Antecedentes', $voluntario->obtener_certificado_antecedentes(), '#modalCertificadoAntecedentes'); ?>
                 </div>
             </div>
         </div>
@@ -136,7 +136,12 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                     <h5 class="text-muted">Estado y acciones</h5>
                     <hr>
                     <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
-
+                    <label for="estado">Acción</label>
+                    <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
+                        <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
+                    <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
+                        <strong>Contactar con soporte</strong>
+                   <?php  } ?>
                 </div>
                 <div class="col-md-6 text-center">
 
@@ -144,9 +149,12 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                         <?php if ($credencial) { ?>
                             <h5>Credencial</h5>
                             <hr>
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Editar credencial</button>
                             <a class="btn btn-info" target="_blank" href="<?php echo 'MiCredencial-vol.php?id=' . $idVoluntario; ?>">Ver Credencial</a>
-                    <?php }
-                    } ?>
+                        <?php } else { ?>
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalCredencial">Generar credencial</button>
+                        <?php } ?>
+                    <?php } ?>
                 </div>
             </div>
             <hr>
@@ -166,9 +174,11 @@ function generarDetalle($detalles)
 {
     foreach ($detalles as $label => $valor) {
         echo '<p><strong>' . htmlspecialchars($label) . ':</strong> ' . htmlspecialchars($valor) . '</p>';
-        if ($label === 'Profesión') {
-?>
-    
+        if ( $label === 'Profesión') {
+            ?>
+            <button type="button" class="btn btn-xs btn-primary" data-bs-toggle="modal" data-bs-target="#modalProfesion">
+                Cambiar Profesión
+            </button>
 
             <?php
         }
@@ -181,7 +191,7 @@ function generarDetalle($detalles)
                 break;
             case 'Correo':
             ?>
-                <input type="text" id="Correo" hidden value="<?php echo htmlspecialchars($valor) ?>">
+                <input  type="text" id="Correo" hidden value="<?php echo htmlspecialchars($valor) ?>">
                 <button id="btnCambiarCorreo" type="button" class="btn btn-primary" onclick="mostrarModal('Correo')">Cambiar Correo</button>
 <?php
                 break;
@@ -196,24 +206,26 @@ function generarImagen($url, $alt, $modalTarget)
     } else {
         echo '<p>No hay una ' . htmlspecialchars($alt) . ' cargada.</p>';
     }
+    echo '<br><button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nueva Foto</button>';
 }
 
 function generarDocumento($label, $url, $modalTarget)
 {
     echo '<p><strong>' . htmlspecialchars($label) . ':</strong><br>';
-
+    
     // Verificar que la URL no está vacía después de limpiar espacios
     $urlLimpia = trim($url);
-
+    
     // Extraer el nombre del archivo y verificar que no esté vacío
     $nombreArchivo = basename($urlLimpia);
-
+    
     if (!empty($urlLimpia) && $nombreArchivo !== '' && strpos($nombreArchivo, '.') !== 0) {
-        echo '<a href="' . htmlspecialchars($urlLimpia) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
+    echo '<a href="' . htmlspecialchars($urlLimpia) . '" class="btn btn-link" target="_blank">Ver Documento</a>';
     } else {
         echo '<span class="text-danger">No disponible</span>';
     }
-
+    
+    echo ' <button type="button" class="btn btn-info" data-toggle="modal" data-target="' . htmlspecialchars($modalTarget) . '">Subir Nuevo Documento</button></p>';
 }
 
 

@@ -26,7 +26,7 @@ if (!$voluntario) {
     exit;
 }
 
-$institucion = 'CNRD ' . $voluntario->obtener_region();
+$institucion = 'CNRD ' . $voluntario->obtener_id_region();
 
 // Función para mostrar mensajes de error
 function mostrarError($mensaje)

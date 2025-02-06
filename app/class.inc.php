@@ -9,6 +9,7 @@ class Voluntario
     private $correo;
     private $profesion;
     private $region;
+    private $id_region;
     private $comuna;
     private $experiencia_voluntario;
     private $experiencia_otra_emergencia;
@@ -29,7 +30,7 @@ class Voluntario
     private $certificado_antecedentes;
     private $TypeUser;
 
-    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, 
+    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $id_region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, 
     $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, 
     $certificado_antecedentes,$TypeUser)
     {
@@ -39,6 +40,7 @@ class Voluntario
         $this->telefono = $telefono;
         $this->correo = $correo;
         $this->profesion = $profesion;
+        $this->id_region = $id_region;
         $this->region = $region;
         $this->comuna = $comuna;
         $this->experiencia_voluntario = $experiencia_voluntario;
@@ -67,6 +69,8 @@ class Voluntario
     public function cambiar_certificado_antecedentes($certificado_antecedentes) {$this->certificado_antecedentes = $certificado_antecedentes; }
     public function cambiar_certificado_titulo($certificado_titulo) {$this->certificado_titulo = $certificado_titulo; }
     public function cambiar_TypeUser($TypeUser) {$this->TypeUser = $TypeUser; }
+
+
     public function obtener_id(){ return $this->id; }
     public function obtener_nombre(){ return $this->nombre; }
     public function obtener_rut(){ return $this->rut; }
@@ -74,6 +78,7 @@ class Voluntario
     public function obtener_correo(){ return $this->correo; }
     public function obtener_profesion(){ return $this->profesion; }
     public function obtener_region(){ return $this->region; }
+    public function obtener_id_region(){ return $this->id_region; }
     public function obtener_comuna(){ return $this->comuna; }
     public function obtener_experiencia_voluntario(){ return $this->experiencia_voluntario; }
     public function obtener_experiencia_otra_emergencia(){ return $this->experiencia_otra_emergencia; }

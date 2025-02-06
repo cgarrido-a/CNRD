@@ -19,7 +19,7 @@ if (count($voluntarios)) {
             "id" => $voluntario->obtener_id(),
             "nombre" => $voluntario->obtener_nombre(),
             "telefono" => $voluntario->obtener_telefono(),
-            "region" => $voluntario->obtener_region(),
+            "region" => $voluntario->obtener_id_region(), //devuelve el nombre de la region
             "comuna" => $voluntario->obtener_comuna(),
             "estado" => $voluntario->obtener_estado(),
             "profesion" => $voluntario->obtener_profesion(),
@@ -37,7 +37,7 @@ if (count($voluntarios)) {
             <input type="text" id="filtroNombre" class="form-control" placeholder="Nombre" oninput="filtrarTabla()">
         </div>
         <div class="col-md">
-            <select id="filtroTipo" class="form-select" onchange="filtrarTabla()">
+            <select id="filtroTipo" class="form-select" onchange="filtrarTabla('1')">
                 <option value="">Tipo</option>
                 <option value="Medico Veterinario">Médico Veterinario</option>
                 <option value="Tecnico Veterinario">Técnico Veterinario</option>
@@ -47,35 +47,8 @@ if (count($voluntarios)) {
             </select>
         </div>
         
-        <?php  if ($_SESSION['UserLog']->obtener_region() === 'Nacional') { ?>
-            <div class="col-md">
-                <select id="filtroRegion" class="form-select" onchange="filtrarTabla()">
-                    <?php
-                    foreach ($regiones as $region) {
-                        echo "<option value='" . $region['Region'] . "'>" . $region['Region'] . "</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="col-md">
-                <select id="filtroAutorizado" class="form-select" onchange="filtrarTabla()">
-                    <option value="">Estado</option>
-                    <option value="habilitado">Habilitado</option>
-                    <option value="deshabilitado">Deshabilitado</option>
-                </select>
-            </div>
-        <?php } else { ?>
-            <div class="col-md" hidden>
-                <input id="filtroRegion" class="form-control">
-            </div>
-            <div class="col-md" hidden>
-                <select id="filtroAutorizado" class="form-select" onchange="filtrarTabla()">
-                    <option value="">Estado</option>
-                    <option value="habilitado">Habilitado</option>
-                    <option value="deshabilitado">Deshabilitado</option>
-                </select>
-            </div>
-        <?php } ?>
+           
+        
     </div>
 
     <!-- Tabla de Voluntarios -->
@@ -86,7 +59,6 @@ if (count($voluntarios)) {
                 <th>Región</th>
                 <th>Telefono</th>
                 <th>Tipo</th>
-                <th>Autorizado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -115,31 +87,23 @@ if (count($voluntarios)) {
     voluntarios.forEach(voluntario => {
         voluntario.region = decodeHTML(voluntario.region);
     });
-    <?php
-    if ($_SESSION['UserLog']->obtener_region() != 'Nacional') {
-    ?>
-        var reg = "<?php echo $_SESSION['UserLog']->obtener_region(); ?>";
-        voluntarios = voluntarios.filter(voluntario => voluntario.region === reg && voluntario.estado === 'habilitado');
-    <?php
-    }
-    ?>
+
     let currentPage = 1; // Página actual
     const rowsPerPage = 25; // Número de filas por página
 
     // Función para filtrar los voluntarios
-    function filtrarTabla() {
-        currentPage = 1
+    function filtrarTabla(pagina) {
+        if(!pagina){
+            currentPage=1
+        }
         const filtroNombre = document.getElementById("filtroNombre").value.toLowerCase();
         const filtroTipo = document.getElementById("filtroTipo").value;
-        const filtroAutorizado = document.getElementById("filtroAutorizado").value;
         // Filtrar voluntarios
-        const filtroRegion = document.getElementById("filtroRegion").value;
         const voluntariosFiltrados = voluntarios.filter(voluntario => {
             return (
                 (!filtroNombre ||
                     voluntario.nombre.toLowerCase().includes(filtroNombre) ||
                     voluntario.telefono.toLowerCase().includes(filtroNombre)) &&
-                (!filtroRegion || voluntario.region === filtroRegion) &&
                 (
                     !filtroTipo ||
                     (filtroTipo === "Voluntario General" ?
@@ -148,12 +112,11 @@ if (count($voluntarios)) {
                             "Medico Veterinario", "Tecnico Veterinario"
                         ].includes(voluntario.profesion) :
                         voluntario.profesion === filtroTipo)
-                ) &&
-                (!filtroAutorizado || voluntario.estado === filtroAutorizado)
+                ) 
             );
         });
 
-
+       
         mostrarTabla(voluntariosFiltrados);
         generarPaginador(voluntariosFiltrados);
     }
@@ -217,11 +180,11 @@ if (count($voluntarios)) {
     // Función para cambiar de página
     function cambiarPagina(page) {
         currentPage = page;
-        filtrarTabla(); // Vuelve a filtrar y mostrar la tabla
+        filtrarTabla(currentPage); // Vuelve a filtrar y mostrar la tabla
     }
 
     // Inicializar la tabla
-    filtrarTabla();
+    filtrarTabla(currentPage);
 </script>
 
 <?php

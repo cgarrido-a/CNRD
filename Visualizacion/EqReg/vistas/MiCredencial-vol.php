@@ -283,7 +283,7 @@ $qrImage = base64_encode(ob_get_clean());
         <br>
         <div class="botones-container">
             <!-- Botón Volver -->
-            <a href="index.php" class="btn btn-outline-primary btn-lg px-4 py-2 shadow rounded-pill">
+            <a href="verVoluntario.php?id=<?php echo $id; ?>" class="btn btn-outline-primary btn-lg px-4 py-2 shadow rounded-pill">
                 <i class="bi bi-arrow-left-circle"></i> Volver
             </a>
 
