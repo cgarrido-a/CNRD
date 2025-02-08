@@ -32,6 +32,9 @@ if (count($voluntarios)) {
     <h2>Gestión de Voluntarios</h2>
 
 
+    <a href="listvol.php" class="btn btn-danger">
+        <i class="fas fa-file-pdf"></i> Generar PDF
+    </a>
     <!-- Filtros -->
     <div class="row g-3 mb-3">
         <div class="col-md">

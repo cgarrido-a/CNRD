@@ -29,6 +29,7 @@
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
             <button type="button" onclick="ActCredencial()" class="btn btn-primary">Guardar</button>
           </div>
+          
         </form>
       <?php
       } else {

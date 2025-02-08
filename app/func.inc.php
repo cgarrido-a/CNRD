@@ -172,6 +172,62 @@ class Clinicas
 
 class Usuario
 {
+    public static function ActCon($id_consejo, $id_coordinador)
+    {
+        try {
+            $pdo = Database::connect();
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // Definir la consulta para actualizar el estado de habilitación
+            $sql = "UPDATE consejos SET id_coordinador = :habilitacion WHERE id = :clinicaId";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':habilitacion',$id_coordinador,PDO::PARAM_INT);
+            $stmt->bindParam(':clinicaId',$id_consejo,PDO::PARAM_INT);
+
+            // Ejecutar la consulta
+            $resultado =$stmt->execute();
+            if($resultado){
+                return true;
+            }else {
+            return false;
+            }
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
+        } finally {
+            $pdo = null;
+        }
+    }
+    public static function ObtenerConsejos($id)
+    {
+        $regiones = [];  // Asegúrate de usar $regiones
+        $pdo = Database::connect();
+        try {
+            $sql = "SELECT * FROM consejos WHERE region_id = :id";
+            $sentencia = $pdo->prepare($sql);
+            $sentencia->bindParam(':id', $id, PDO::PARAM_STR);
+            $sentencia->execute();
+            $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+
+            if (count($resultado)) {
+                foreach ($resultado as $fila) {
+                    if ($fila['nombre'] != 'Nacional') {
+                        $regiones[] = [
+                            "id" => htmlspecialchars($fila['id']),
+                            "region_id" => htmlspecialchars($fila['region_id']),
+                            "nombre" => htmlspecialchars($fila['nombre']),
+                            "correo" => htmlspecialchars($fila['correo']),
+                            "clave" => htmlspecialchars($fila['clave']),
+                            "id_coordinador" => htmlspecialchars($fila['id_coordinador'])
+                        ];
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
+        }
+        return $regiones;  // Cambié $consejos por $regiones aquí
+    }
+
     public static function obtener_regiones()
     {
         $regiones = [];
@@ -312,30 +368,6 @@ class Usuario
         } catch (PDOException $e) {
             return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
         }
-    }
-    public static function listarconsejos_cor($region){
-        $regiones = [];
-        $conexion = Database::connect();
-        try {
-            $sql = "SELECT * FROM consejos WHERE region_id = :region_id";
-            $sentencia = $conexion->prepare($sql);
-            $sentencia->bindParam(':region_id', $region);
-            $sentencia->execute();
-            $resultado = $sentencia->fetchAll(PDO::FETCH_ASSOC);
-            if (count($resultado)) {
-                foreach ($resultado as $fila) {
-                    if ($fila['Region'] != 'Nacional') {
-                        $regiones[] = [
-                            "id" => htmlspecialchars($fila["ID"]),
-                            "nombre" => htmlspecialchars($fila["Region"])
-                        ];
-                    }
-                }
-            }
-        } catch (PDOException $e) {
-            return ['error' => 'Error en la base de datos: ' . $e->getMessage()];
-        }
-        return $regiones;
     }
 
 

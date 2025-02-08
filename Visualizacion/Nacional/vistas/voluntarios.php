@@ -31,7 +31,9 @@ if (count($voluntarios)) {
 <div class="container mt-5">
     <h2>Gestión de Voluntarios</h2>
 
-
+    <a href="listvol.php" class="btn btn-danger">
+        <i class="fas fa-file-pdf"></i> Generar PDF
+    </a>
     <!-- Filtros -->
     <div class="row g-3 mb-3">
         <div class="col-md">
@@ -48,7 +50,7 @@ if (count($voluntarios)) {
             </select>
         </div>
 
-        <div class="col-md" hidden>
+        <div class="col-md" >
             <select id="filtroRegion" class="form-select" onchange="filtrarTabla('1')">
                 <option value="">Región</option>
                 <?php
@@ -58,7 +60,7 @@ if (count($voluntarios)) {
                 ?>
             </select>
         </div>
-        <div class="col-md" hidden>
+        <div class="col-md" >
             <select id="filtroAutorizado" class="form-select" onchange="filtrarTabla('1')">
                 <option value="">Estado</option>
                 <option value="habilitado">Habilitado</option>

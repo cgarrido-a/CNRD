@@ -7,6 +7,7 @@ include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
 $ruta = '';
+$credencial=Usuario::get_cedusuario($_SESSION['UserLog']->obtener_id());
 include_once('../plantillas/DecInc.inc.php');
 foreach (glob("../modales/*.php") as $archivo) {
     include_once $archivo;
@@ -50,7 +51,7 @@ foreach (glob("../modales/*.php") as $archivo) {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="btnCambiarClave" class="font-weight-bold"><strong>Clave</strong></label>
-                            <button type="button" id="btnCambiarClave" class="btn btn-warning btn-block">Cambiar Clave</button>
+                            <button type="button" id="btnCambiarClave" class="btn btn-outline-warning btn-block">Cambiar Clave</button>
                         </div>
 
                         <!-- Región -->
@@ -69,13 +70,12 @@ foreach (glob("../modales/*.php") as $archivo) {
                         <div class="col-md-6 mb-3">
                             <label for="profesion" class="font-weight-bold"><strong>Profesión</strong></label>
                             <p id="profesion" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_profesion()); ?></p>
-                            <button id="btnCambiarProfesion" type="button" class="btn btn-outline-secondary mt-2" onclick="mostrarModal('Profesion')">Nuevo Cambiar Profesión</button>
                         </div>
 
                         <!-- Certificado de Antecedentes -->
                         <div class="col-md-6 mb-3">
                             <label for="certificadoAntecedentes" class="font-weight-bold"><strong>Certificado de Antecedentes</strong></label>
-                            <button id="btnNuevoCertificado" type="button" class="btn btn-outline-secondary mt-2" onclick="mostrarModal('CertificadoAntecedentes')">Nuevo Certificado de Antecedentes</button>
+                            <button id="btnNuevoCertificado" type="button" class="btn btn-outline-secondary mt-2" data-toggle="modal" data-target="#modalCertificadoTitulo">Nuevo Certificado de Titulo/Alumno regular</button>
                         </div>
 
                     </div>
