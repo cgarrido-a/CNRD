@@ -3,6 +3,7 @@ require_once __DIR__ . "/../../../app/class.inc.php";
 
 session_start();
 include_once('../plantillas/LLamstan.inc.php');
+include_once('../plantillas/DecInc.inc.php');
 
 if (!isset($_SESSION['UserLog'])) {
     die("<div class='container mt-5 alert alert-danger'>Error: No tienes acceso a esta página.</div>");
@@ -35,80 +36,117 @@ try {
     $stmtAnimales = $conexion->prepare("SELECT * FROM animales_afectados WHERE informe_id = ?");
     $stmtAnimales->execute([$id_informe]);
     $animales = $stmtAnimales->fetchAll(PDO::FETCH_ASSOC);
-
 } catch (PDOException $e) {
     die("<div class='container mt-5 alert alert-danger'>Error en la base de datos: " . $e->getMessage() . "</div>");
 }
 ?>
 
 <div class="container mt-5">
-    <h2 class="mb-4 text-primary"><i class="fas fa-file-alt"></i> Detalles del Informe</h2>
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Campo</th>
-                    <th scope="col">Información</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><th scope="row">ID Informe</th> <td><?php echo htmlspecialchars($informe['id']); ?></td></tr>
-                <tr><th scope="row">Fecha</th> <td><?php echo htmlspecialchars($informe['fecha']); ?></td></tr>
-                <tr><th scope="row">Región</th> <td><?php echo htmlspecialchars($informe['region']); ?></td></tr>
-                <tr><th scope="row">Provincia</th> <td><?php echo htmlspecialchars($informe['provincia']); ?></td></tr>
-                <tr><th scope="row">Comuna</th> <td><?php echo htmlspecialchars($informe['comuna']); ?></td></tr>
-                <tr><th scope="row">Ubicación Georreferencial</th> <td><?php echo htmlspecialchars($informe['ubicacion_georreferencial'] ?? 'No especificado'); ?></td></tr>
-                <tr><th scope="row">Dirección</th> <td><?php echo htmlspecialchars($informe['direccion']); ?></td></tr>
-                <tr><th scope="row">Tipo de Zona</th> <td><?php echo htmlspecialchars($informe['tipo_zona']); ?></td></tr>
-                <tr><th scope="row">Voluntario Responsable</th> <td><?php echo htmlspecialchars($voluntario['nombre'] ?? 'Desconocido'); ?></td></tr>
-                <tr><th scope="row">Tipo de Evento</th> <td><?php echo htmlspecialchars($informe['tipo_evento']); ?></td></tr>
-                <tr><th scope="row">Categoría</th> <td><?php echo htmlspecialchars($informe['categoria']); ?></td></tr>
-                <tr><th scope="row">Descripción del Evento</th> <td><?php echo nl2br(htmlspecialchars($informe['descripcion_evento'])); ?></td></tr>
-                <tr><th scope="row">Procesos Realizados</th> <td><?php echo nl2br(htmlspecialchars($informe['procesos_realizados'])); ?></td></tr>
-                <tr><th scope="row">Decisiones Tomadas</th> <td><?php echo nl2br(htmlspecialchars($informe['decisiones_tomadas'])); ?></td></tr>
-                <tr><th scope="row">Fecha de Creación</th> <td><?php echo htmlspecialchars($informe['created_at']); ?></td></tr>
-                <tr><th scope="row">Última Modificación</th> <td><?php echo htmlspecialchars($informe['updated_at']); ?></td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <h4 class="mt-4 text-primary"><i class="fas fa-paw"></i> Animales Afectados</h4>
-    <?php if (count($animales) > 0): ?>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered mt-3">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Especie</th>
-                        <th>N° Atendidos</th>
-                        <th>N° Fallecidos</th>
-                        <th>N° Pendientes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($animales as $animal): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($animal['especie']); ?></td>
-                            <td><?php echo htmlspecialchars($animal['n_atendidos']); ?></td>
-                            <td><?php echo htmlspecialchars($animal['n_fallecidos']); ?></td>
-                            <td><?php echo htmlspecialchars($animal['n_pendientes']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h3><i class="fas fa-file-alt"></i> Detalles del Informe</h3>
         </div>
-    <?php else: ?>
-        <p class="text-muted">No se han registrado animales afectados en este informe.</p>
-    <?php endif; ?>
+        <div class="card-body">
+            <div class="row">
+                <!-- Información General -->
+                <div class="col-md-6">
+                    <h5 class="text-muted">Información General</h5>
+                    <hr>
+                    <?php generarDetalle([
+                        'ID Informe' => $informe['id'],
+                        'Fecha' => $informe['fecha'],
+                        'Región' => $informe['region'],
+                        'Provincia' => $informe['provincia'],
+                        'Comuna' => $informe['comuna'],
+                        'Ubicación Georreferencial' => $informe['ubicacion_georreferencial'] ?? 'No especificado',
+                        'Dirección' => $informe['direccion'],
+                        'Tipo de Zona' => ucfirst($informe['tipo_zona']),
+                        'Tipo de Evento' => ucfirst($informe['tipo_evento']),
+                        'Categoría' => ucfirst($informe['categoria']),
+                    ]); ?>
+                </div>
 
-    <div class="d-flex justify-content-between mt-4">
-        <a href="descargarInforme.php?id=<?php echo $informe['id']; ?>" class="btn btn-danger">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
-        </a>
-        <a href="informes.php" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver a la Lista
-        </a>
+                <!-- Información del Voluntario -->
+                <div class="col-md-6">
+                    <h5 class="text-muted">Voluntario Responsable</h5>
+                    <hr>
+                    <?php generarDetalle([
+                        'Nombre' => $voluntario['nombre'] ?? 'Desconocido',
+                        'Email' => $voluntario['correo'] ?? 'Desconocido',
+                        'Email' => $voluntario['region_id'] ?? 'Desconocido',
+                    ]); ?>
+                </div>
+            </div>
+
+            <!-- Detalles del Evento -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-muted">Detalles del Evento</h5>
+                    <hr>
+                    <?php generarDetalle([
+                        'Descripción del Evento' => nl2br($informe['descripcion_evento']),
+                        'Procesos Realizados' => nl2br($informe['procesos_realizados']),
+                        'Decisiones Tomadas' => nl2br($informe['decisiones_tomadas']),
+                    ]); ?>
+                </div>
+            </div>
+
+            <!-- Tabla de Animales Afectados -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-muted"><i class="fas fa-paw"></i> Animales Afectados</h5>
+                    <hr>
+                    <?php if (count($animales) > 0): ?>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered mt-3">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Especie</th>
+                                        <th>N° Atendidos</th>
+                                        <th>N° Fallecidos</th>
+                                        <th>N° Pendientes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($animales as $animal): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($animal['especie']); ?></td>
+                                            <td><?php echo htmlspecialchars($animal['n_atendidos']); ?></td>
+                                            <td><?php echo htmlspecialchars($animal['n_fallecidos']); ?></td>
+                                            <td><?php echo htmlspecialchars($animal['n_pendientes']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-muted">No se han registrado animales afectados en este informe.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a href="descargarInforme.php?id=<?php echo $informe['id']; ?>" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </a>
+            <a href="informes.php" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
     </div>
 </div>
 
-<?php include_once('../plantillas/DecFin.inc.php'); ?>
+<?php
+// Función para mostrar los detalles de forma organizada
+function generarDetalle($detalles)
+{
+    echo '<ul class="list-group">';
+    foreach ($detalles as $label => $valor) {
+        echo '<li class="list-group-item"><strong>' . htmlspecialchars($label) . ':</strong> ' . htmlspecialchars($valor) . '</li>';
+    }
+    echo '</ul>';
+}
+
+include_once('../plantillas/DecFin.inc.php');
+?>
