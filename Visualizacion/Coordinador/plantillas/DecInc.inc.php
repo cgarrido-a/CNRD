@@ -53,8 +53,11 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="<?php echo $ruta. 'hisasisvol.php'; ?>">Historial asistencia</a></li>
+                        <!-- <li><a class="dropdown-item" href="<?php echo $ruta. 'HisAsis.php'; ?>">Historial asistencia</a></li> -->
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?php echo $ruta . 'informes.php'; ?>">Informe</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo $ruta. 'MiCredencial.php?id=' . $_SESSION['user_id'] ?>">Mi Credencial</a>

@@ -11,6 +11,11 @@ if (!isset($_SESSION['UserLog'])) {
     header('Location: login.html'); // Redirige al login si no hay sesión activa
     exit();
 }
+if (!is_object($_SESSION['UserLog']) || !method_exists($_SESSION['UserLog'], 'obtener_TypeUser')) {
+    session_destroy(); // Borra la sesión si los datos no son válidos
+    header('Location: login.html');
+    exit();
+}
 $type = $_SESSION['UserLog']->obtener_TypeUser();
 
 $ruta2 = __DIR__ . '/Visualizacion/'.$type.'/';

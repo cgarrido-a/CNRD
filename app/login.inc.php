@@ -1,4 +1,6 @@
 <?php
+session_start(); // Iniciamos la sesión al principio
+
 $response = [];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -8,27 +10,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         // Limpiar y validar los datos recibidos
         $usuario = htmlspecialchars(trim($_POST['usuario']), ENT_QUOTES, 'UTF-8');
-        $contrasena = trim($_POST['clave']); // Contraseña no se sanitiza para mantener la integridad del hash
+        $contrasena = trim($_POST['clave']); // No sanitizamos para no afectar el hash
         $tipo = htmlspecialchars(trim($_POST['tipo']), ENT_QUOTES, 'UTF-8');
 
         try {
             include_once('conex.inc.php'); // Conexión a la base de datos
             include_once('func.inc.php'); // Funciones adicionales
             
-            // Simulación del método de login
-            
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
+            // Llamar al método de login
             $resultado = Usuario::login($usuario, $contrasena, $tipo);
 
             if (isset($resultado['error'])) {
                 $response['error'] = $resultado['error'];
             } else {
-                // Sesión exitosa: guardar datos de sesión y enviar respuesta
-                $_SESSION['user'] = $resultado; // Suponiendo que `$resultado` tiene los datos del usuario
+                // ✅ Guardar SIEMPRE el ID del usuario en la sesión
+                $_SESSION['user_id'] = $resultado['id']; // Guardamos el ID
+                $_SESSION['TypeUser'] = $resultado['TypeUser']; // Guardamos el tipo de usuario
+                $_SESSION['user'] = $resultado; // Guardamos todos los datos del usuario
+
                 $response['success'] = true;
-                $response['user'] = $resultado; // Puedes devolver datos relevantes del usuario
+                $response['user'] = $resultado;
             }
         } catch (Exception $e) {
             $response['error'] = 'Error al procesar la solicitud: ' . $e->getMessage();
@@ -40,5 +41,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 echo json_encode($response);
 exit();
-
-?>

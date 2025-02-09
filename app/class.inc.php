@@ -30,10 +30,8 @@ class Voluntario
     private $certificado_antecedentes;
     private $TypeUser;
 
-    public function __construct($id,$nombre, $rut, $telefono, $correo,  $profesion, $region, $id_region, $comuna, $experiencia_voluntario, $experiencia_otra_emergencia, $recursos_propios, $hobbies, $tipo_alimentacion, $grupo_sanguineo, $enfermedades_cronicas, $actividades, 
-    $area_desempeno, $experiencia_emergencias, $experiencia_animales, $experiencia_desastres, $certificado_titulo, $estado, $fecha_registro, $fotoperfil, 
-    $certificado_antecedentes,$TypeUser)
-    {
+      // 🔹 Constructor flexible: acepta solo ID o todos los datos
+      public function __construct($id, $nombre = null, $rut = null, $telefono = null, $correo = null, $profesion = null, $region = null, $id_region = null, $comuna = null, $experiencia_voluntario = null, $experiencia_otra_emergencia = null, $recursos_propios = null, $hobbies = null, $tipo_alimentacion = null, $grupo_sanguineo = null, $enfermedades_cronicas = null, $actividades = null, $area_desempeno = null, $experiencia_emergencias = null, $experiencia_animales = null, $experiencia_desastres = null, $certificado_titulo = null, $estado = null, $fecha_registro = null, $fotoperfil = null, $certificado_antecedentes = null, $TypeUser = null) {
         $this->id = $id;
         $this->nombre = $nombre;
         $this->rut = $rut;
@@ -98,6 +96,54 @@ class Voluntario
     public function obtener_fotoperfil(){ return $this->fotoperfil; }
     public function obtener_certificado_antecedentes(){ return $this->certificado_antecedentes; }
     public function obtener_TypeUser(){ return $this->TypeUser; }
+
+    // 🔹 Método para obtener los informes de este voluntario
+    public function obtenerInformes() {
+        try {
+            $conexion = new PDO("mysql:host=localhost;dbname=cnrd_nueva", "root", "");
+            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $stmt = $conexion->prepare("SELECT id, fecha, region, provincia, comuna, ubicacion_georreferencial, direccion, tipo_zona, tipo_evento, categoria, descripcion_evento, procesos_realizados, decisiones_tomadas, created_at, updated_at FROM informes WHERE voluntario_id = ?");
+            $stmt->execute([$this->id]);
+
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            error_log("Error en obtenerInformes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+        // 🔹 Método para buscar un voluntario en la base de datos y cargar sus datos
+        public static function buscarPorId($id) {
+            try {
+                $conexion = new PDO("mysql:host=localhost;dbname=cnrd_nueva", "root", "");
+                $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+                $stmt = $conexion->prepare("SELECT * FROM voluntarios WHERE id = ?");
+                $stmt->execute([$id]);
+                $datos = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+                if (!$datos) {
+                    return null; // Si no encuentra el voluntario, devuelve null
+                }
+    
+                return new Voluntario(
+                    $datos['id'], $datos['nombre'], $datos['rut'], $datos['telefono'], $datos['correo'],
+                    $datos['profesion'], $datos['region'], $datos['id_region'], $datos['comuna'],
+                    $datos['experiencia_voluntario'], $datos['experiencia_otra_emergencia'],
+                    $datos['recursos_propios'], $datos['hobbies'], $datos['tipo_alimentacion'],
+                    $datos['grupo_sanguineo'], $datos['enfermedades_cronicas'], $datos['actividades'],
+                    $datos['area_desempeno'], $datos['experiencia_emergencias'], $datos['experiencia_animales'],
+                    $datos['experiencia_desastres'], $datos['certificado_titulo'], $datos['estado'],
+                    $datos['fecha_registro'], $datos['fotoperfil'], $datos['certificado_antecedentes'],
+                    $datos['TypeUser']
+                );
+            } catch (PDOException $e) {
+                error_log("Error en buscarPorId: " . $e->getMessage());
+                return null;
+            }
+        }
+
 }
 
 class Ubicaciones
@@ -247,5 +293,39 @@ class Certificados
     public function obtener_titulo() { return $this->titulo; }
     public function obtener_ubicacion() { return $this->ubicacion; }
 }
+
+class Informe
+{
+    private $id;
+    private $titulo;
+    private $descripcion;
+    private $fecha_creacion;
+    private $autor;
+    private $estado;
+
+    public function __construct($id, $titulo, $descripcion, $fecha_creacion, $autor, $estado)
+    {
+        $this->id = $id;
+        $this->titulo = $titulo;
+        $this->descripcion = $descripcion;
+        $this->fecha_creacion = $fecha_creacion;
+        $this->autor = $autor;
+        $this->estado = $estado;
+    }
+
+    public function cambiar_titulo($titulo) { $this->titulo = $titulo; }
+    public function cambiar_descripcion($descripcion) { $this->descripcion = $descripcion; }
+    public function cambiar_fecha_creacion($fecha_creacion) { $this->fecha_creacion = $fecha_creacion; }
+    public function cambiar_autor($autor) { $this->autor = $autor; }
+    public function cambiar_estado($estado) { $this->estado = $estado; }
+
+    public function obtener_id() { return $this->id; }
+    public function obtener_titulo() { return $this->titulo; }
+    public function obtener_descripcion() { return $this->descripcion; }
+    public function obtener_fecha_creacion() { return $this->fecha_creacion; }
+    public function obtener_autor() { return $this->autor; }
+    public function obtener_estado() { return $this->estado; }
+}
+
 
 ?>
