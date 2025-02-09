@@ -39,7 +39,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $decisiones_tomadas = $_POST['decisiones_tomadas'];
         $fecha_creacion = date('Y-m-d H:i:s'); // Obtener fecha y hora actual
 
-        // Preparar la consulta SQL
+        // Iniciar transacción
+        $conexion->beginTransaction();
+
+        // Insertar el informe
         $sql = "INSERT INTO informes (
             fecha, region, provincia, comuna, ubicacion_georreferencial, direccion, 
             tipo_zona, voluntario_id, tipo_evento, categoria, descripcion_evento, 
@@ -55,10 +58,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $fecha_creacion, $fecha_creacion
         ]);
 
+        // Obtener el ID del informe recién insertado
+        $id_informe = $conexion->lastInsertId();
+
+        // Insertar información de animales afectados si existe
+        if (!empty($_POST['especie']) && is_array($_POST['especie'])) {
+            $sqlAnimales = "INSERT INTO animales_afectados (
+                informe_id, especie, n_atendidos, n_fallecidos, n_pendientes, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            $stmtAnimales = $conexion->prepare($sqlAnimales);
+
+            foreach ($_POST['especie'] as $index => $especie) {
+                $n_atendidos = $_POST['n_atendidos'][$index] ?? 0;
+                $n_fallecidos = $_POST['n_fallecidos'][$index] ?? 0;
+                $n_pendientes = $_POST['n_pendientes'][$index] ?? 0;
+
+                $stmtAnimales->execute([
+                    $id_informe, $especie, $n_atendidos, $n_fallecidos, $n_pendientes,
+                    $fecha_creacion, $fecha_creacion
+                ]);
+            }
+        }
+
+        // Confirmar transacción
+        $conexion->commit();
+
         // ✅ Redirigir al listado de informes después de guardar
         header("Location: informes.php?success=1");
         exit();
+
     } catch (Exception $e) {
+        // Revertir la transacción en caso de error
+        $conexion->rollBack();
         die("Error al guardar el informe: " . $e->getMessage());
     }
 } else {

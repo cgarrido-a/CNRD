@@ -101,6 +101,43 @@ include_once('../plantillas/DecInc.inc.php');
                     </div>
                 </div>
 
+                <hr>
+                <h4 class="mb-3">Animales Afectados</h4>
+                <div id="animales-container">
+                    <div class="row animal-entry">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Especie</label>
+                            <select name="especie[]" class="form-select" required>
+                                <option value="" selected disabled>Seleccione especie</option>
+                                <option value="bovino">Bovino</option>
+                                <option value="equino">Equino</option>
+                                <option value="ovino">Ovino</option>
+                                <option value="caprino">Caprino</option>
+                                <option value="porcino">Porcino</option>
+                                <option value="felino">Felino</option>
+                                <option value="canino">Canino</option>
+                                <option value="aves_corral">Aves de Corral</option>
+                                <option value="exoticos">Exóticos</option>
+                                <option value="fauna_silvestre">Fauna Silvestre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">N° Atendidos</label>
+                            <input type="number" name="n_atendidos[]" class="form-control" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">N° Fallecidos</label>
+                            <input type="number" name="n_fallecidos[]" class="form-control" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">N° Pendientes</label>
+                            <input type="number" name="n_pendientes[]" class="form-control" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-success mb-3" onclick="agregarFila()">+ Agregar Animal</button>
+
                 <div class="d-flex justify-content-between">
                     <a href="informes.php" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Volver
@@ -113,6 +150,42 @@ include_once('../plantillas/DecInc.inc.php');
         </div>
     </div>
 </div>
+
+<script>
+    function agregarFila() {
+        let container = document.getElementById('animales-container');
+        let nuevaFila = document.createElement('div');
+        nuevaFila.classList.add('row', 'animal-entry');
+        nuevaFila.innerHTML = `
+                <div class="col-md-4">
+                <label class="form-label fw-bold">Especie</label>
+                <select name="especie[]" class="form-select" required>
+                    <option value="" selected disabled>Seleccione especie</option>
+                    <option value="bovino">Bovino</option>
+                    <option value="equino">Equino</option>
+                    <option value="ovino">Ovino</option>
+                    <option value="caprino">Caprino</option>
+                    <option value="porcino">Porcino</option>
+                    <option value="felino">Felino</option>
+                    <option value="canino">Canino</option>
+                    <option value="aves_corral">Aves de Corral</option>
+                    <option value="exoticos">Exóticos</option>
+                    <option value="fauna_silvestre">Fauna Silvestre</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <input type="number" name="n_atendidos[]" class="form-control" min="0">
+            </div>
+            <div class="col-md-3 mb-3">
+                <input type="number" name="n_fallecidos[]" class="form-control" min="0">
+            </div>
+            <div class="col-md-3 mb-3">
+                <input type="number" name="n_pendientes[]" class="form-control" min="0">
+            </div>
+        `;
+        container.appendChild(nuevaFila);
+    }
+</script>
 
 <?php
 include_once('../plantillas/DecFin.inc.php');
