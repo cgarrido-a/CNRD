@@ -153,29 +153,25 @@ class Ubicaciones
     private $tipo;
     private $direccion;
     private $email;
-    private $password;
 
-    public function __construct($id, $id_region, $tipo, $direccion, $email, $password)
+    public function __construct($id, $id_region, $tipo, $direccion, $email)
     {
         $this->id = $id;
         $this->id_region = $id_region;
         $this->tipo = $tipo;
         $this->direccion = $direccion;
         $this->email = $email;
-        $this->password = $password;
     }
 
     public function cambiar_tipo($tipo) { return $this->tipo = $tipo; }
     public function cambiar_direccion($direccion) { return $this->direccion = $direccion; }
     public function cambiar_email($email) { return $this->email = $email; }
-    public function cambiar_password($password) { return $this->password = $password; }
 
     public function obtener_id() { return $this->id; }
     public function obtener_id_region() { return $this->id_region; }
     public function obtener_tipo() { return $this->tipo; }
     public function obtener_direccion() { return $this->direccion; }
     public function obtener_email() { return $this->email; }
-    public function obtener_password() { return $this->password; }
 }
 
 class Asistencia

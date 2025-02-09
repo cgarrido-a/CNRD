@@ -7,6 +7,82 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        let Regiones = [] <?php // echo json_encode($listaDeRegiones); 
+                            ?>; // Se obtiene desde PHP
+
+        $(document).ready(function() {
+            // Cargar las regiones desde PHP en una variable JS
+            // Llenar el select de regiones al cargar la página
+            CargarRegiones();
+
+            // Enviar nueva región por AJAX y agregarla dinámicamente
+            $('#enviarRegion').click(function(e) {
+                var valor = document.getElementById('nombreRegion').value;
+
+                alert('valor:'+valor)
+                $.ajax({
+                    url: '../src/funajax.php',
+                    type: 'POST',
+                    data: {
+                        variable: 'AgReg',
+                        accion: 'agregarRegion',
+                        nombreRegion: valor
+                    },
+                    success: function(response) {
+                        console.log(`Respuesta del servidor: ${response}`);
+                        console.log(response);
+                        let jsonResponse = JSON.parse(response);
+
+                        if (jsonResponse.success) {
+                            let nuevaRegion = {
+                                ID: jsonResponse.id,
+                                nombre: jsonResponse.nombreRegion
+                            };
+
+                            // Agregar nueva región a la lista de regiones
+                            Regiones.push(nuevaRegion);
+
+                            // Agregar la nueva región al select de consejos
+                            let select = document.getElementById('SelectRegion');
+                            let option = document.createElement('option');
+                            option.value = nuevaRegion.ID;
+                            option.textContent = nuevaRegion.nombre;
+                            select.appendChild(option);
+
+                            // Resetear formulario
+                            $('#formNuevaRegion')[0].reset();
+
+                            // Cerrar modal
+                            $('#nuevaRegionModal').modal('hide');
+
+                            console.log("Nueva región agregada:", nuevaRegion);
+                        } else {
+                            alert(response.error)
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Error en la solicitud: ${error}`);
+                        alert(`Error en la solicitud: ${error}`);
+                    },
+                });
+
+            });
+        });
+
+        function CargarRegiones() {
+            let select = document.getElementById('SelectRegion');
+            select.innerHTML = ''; // Limpiar antes de agregar opciones
+
+            Regiones.forEach(region => {
+                let option = document.createElement('option');
+                option.textContent = region.nombre;
+                option.value = region.ID;
+                select.appendChild(option);
+            });
+        }
+    </script>
+
     <?php
     switch (basename($_SERVER['PHP_SELF'])) {
 
@@ -211,7 +287,7 @@
 
                     var valor2 = 0; // Valor por defecto vacío
                     if (valor === 'Coordinador') {
-                        valor2 = document.getElementById('SelectorConsejo2').value; 
+                        valor2 = document.getElementById('SelectorConsejo2').value;
                     }
 
                     let data2 = {
