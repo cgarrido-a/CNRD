@@ -166,7 +166,8 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                         <select name="region" id="SelectorConsejo2">
                             <option value=""></option>
                             <?php foreach ($regiones as $region): ?>
-                                <option value="<?php echo $region['id']; ?>"
+                                
+                                <option value="<?php echo $region['region_id']; ?>"
                                     <?php echo ($region['id_coordinador'] == $voluntario->obtener_id()) ? 'selected' : ''; ?>>
                                     <?php echo $region['nombre']; ?>
                                 </option>

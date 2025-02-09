@@ -263,7 +263,7 @@ class Usuario
         $regiones = [];  // Asegúrate de usar $regiones
         $pdo = Database::connect();
         try {
-            $sql = "SELECT * FROM consejos WHERE region_id = :id";
+            $sql = "SELECT * FROM Consejos WHERE region_id = :id";
             $sentencia = $pdo->prepare($sql);
             $sentencia->bindParam(':id', $id, PDO::PARAM_STR);
             $sentencia->execute();
@@ -271,13 +271,13 @@ class Usuario
 
             if (count($resultado)) {
                 foreach ($resultado as $fila) {
-                    if ($fila['nombre'] != 'Nacional') {
+                    if ($fila['Nombre'] != 'Nacional') {
                         $regiones[] = [
-                            "id" => htmlspecialchars($fila['id']),
+                            "id" => htmlspecialchars($fila['ID']),
                             "region_id" => htmlspecialchars($fila['region_id']),
-                            "nombre" => htmlspecialchars($fila['nombre']),
-                            "correo" => htmlspecialchars($fila['correo']),
-                            "clave" => htmlspecialchars($fila['clave']),
+                            "nombre" => htmlspecialchars($fila['Nombre']),
+                            "correo" => htmlspecialchars($fila['Correo']),
+                            "clave" => htmlspecialchars($fila['Clave']),
                             "id_coordinador" => htmlspecialchars($fila['id_coordinador'])
                         ];
                     }
