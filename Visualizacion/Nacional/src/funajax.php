@@ -11,6 +11,41 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 switch ($_POST['variable']) {
+    case 'CamUs22':
+        // Validar que los campos obligatorios estén presentes
+        if (!isset($_POST['tipo'], $_POST['id'], $_POST['camp'], $_POST['valCam'], $_POST['val2'])) {
+            echo '0Faltan datos requeridos.';
+            exit;
+        }
+
+        // Validar y sanitizar entradas
+        $tipo = $_POST['tipo'];
+        $id = $_POST['id'];
+        $camp = $_POST['camp'];
+        $valCam = $_POST['valCam'];
+        $val2 = $_POST['val2'];
+
+        if (!$id || !$camp || !$valCam) {
+            echo '0Datos inválidos.';
+            exit;
+        }
+
+        $r = false;
+
+        $r = Voluntarios::actualizarVol($id, $camp, $valCam);
+
+        // Manejo de respuesta
+        if ($r) {
+            $r2 = Usuario::ActCon($val2, $id);
+            if ($r2) {
+                echo '1correcto';
+            } else {
+                echo '0Error al actualizar el dato.';
+            }
+        } else {
+            echo '0Error al actualizar el dato.';
+        }
+        break;
     case 'CamEstVol':
         if (isset($_POST['id']) && isset($_POST['valor'])) {
             $id = $_POST['id'];
@@ -24,7 +59,7 @@ switch ($_POST['variable']) {
             }
         }
         break;
-    
+
     case 'ActCred':
         if (isset($_POST['id']) && isset($_POST['institucioncred'])) {
             $r = Usuario::actualizarCredencial($_POST['id'], $_POST['nombrecred'], $_POST['institucioncred'], $_POST['cargocred']);

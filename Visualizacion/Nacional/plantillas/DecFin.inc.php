@@ -9,9 +9,9 @@
 
     <?php
     switch (basename($_SERVER['PHP_SELF'])) {
-    
+
         case 'miperfil.php':
-        ?>
+    ?>
             <script>
                 // Función para realizar el cambio
                 function realizarCambio(valor) {
@@ -147,10 +147,10 @@
                     break;
                 case 'Coordinacion':
                 ?>
-                    <script> 
+                    <script>
                         document.getElementById('btnCambiarClave').addEventListener('click', function() {
                             $('#modalClave').modal('show');
-                        }); 
+                        });
                         document.getElementById('btnCambiarClaveModal').addEventListener('click', function() {
                             const nuevaClave = document.getElementById('nuevaClave').value;
                             console.log(nuevaClave)
@@ -190,26 +190,45 @@
                     break;
             }
             break;
-       
+
         case 'verVoluntario.php':
-        ?>
-        <script>
-            function Mostrarbtn(){
-                var btncam = document.getElementById('btnConTip')
-                btncam.removeAttribute('hidden')
-            }
-            function cambTyUs(){
-                var valor = document.getElementById('tipoUsuario').value
-                $.ajax({
+            ?>
+            <script>
+                function Mostrarbtn() {
+                    var btncam = document.getElementById('btnConTip')
+                    var tipoUsuario = document.getElementById('tipoUsuario').value
+                    if (tipoUsuario === 'Coordinador') {
+                        document.getElementById('SelectorConsejo').removeAttribute('hidden')
+                    } else {
+                        document.getElementById('SelectorConsejo').setAttribute('hidden', true)
+
+                    }
+                    btncam.removeAttribute('hidden')
+                }
+
+                function cambTyUs() {
+                    var valor = document.getElementById('tipoUsuario').value;
+
+                    var valor2 = 0; // Valor por defecto vacío
+                    if (valor === 'Coordinador') {
+                        valor2 = document.getElementById('SelectorConsejo2').value; 
+                    }
+
+                    let data2 = {
+                        variable: 'CamUs22',
+                        tipo: 'voluntario',
+                        id: <?php echo $_GET['id']; ?>,
+                        camp: 'TyUs',
+                        valCam: valor,
+                        val2: valor2, // Valor obtenido correctamente
+                    };
+
+                    console.log(data2);
+
+                    $.ajax({
                         url: '../src/funajax.php',
                         type: 'POST',
-                        data: {
-                            variable: 'CamUs',
-                            tipo: 'voluntario',
-                            id: <?php echo $_GET['id'] ?>,
-                            camp: 'TyUs',
-                            valCam: valor,
-                        },
+                        data: data2, // Usamos `data2` directamente
                         success: function(response) {
                             console.log(`Respuesta del servidor: ${response}`);
                             if (response === '1correcto') {
@@ -222,9 +241,9 @@
                             console.error(`Error en la solicitud: ${error}`);
                         },
                     });
-            }
-        </script>
-        <script>
+                }
+            </script>
+            <script>
                 // Función para realizar el cambio
                 function realizarCambio(valor) {
                     const nuevoValor = document.getElementById("inp2").value.trim();
@@ -493,9 +512,8 @@
                 });
             </script>
 
-        <?php
+    <?php
             break;
-      
     }
     ?>
     </body>

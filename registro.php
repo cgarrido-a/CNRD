@@ -14,5 +14,5 @@ if (isset($_POST['hobbys'])) {
         echo "Error desconocido o no esperado: " . $resultadosins;
     }
 } else {
-    include_once('plantillareg/form1.html');
+    include_once('plantillareg/form1.php');
 }

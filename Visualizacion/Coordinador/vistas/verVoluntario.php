@@ -20,6 +20,9 @@ if (!$idVoluntario) {
 // Obtener datos del voluntario
 $voluntario = Voluntarios::obtenerVoluntarioPorId($idVoluntario);
 $credencial = Usuario::get_cedusuario($idVoluntario);
+$idreg= $voluntario->obtener_region();
+$regiones = Usuario::ObtenerConsejos($idreg);
+
 
 if (!$voluntario) {
     mostrarError("No se encontraron datos para el voluntario especificado.");
@@ -133,16 +136,47 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
 
         <div class="card-footer">
             <div class="row">
-                <div class="col-md-6 text-center">
-                    <h5 class="text-muted">Estado y acciones</h5>
+            <div class="col-md-6 text-center">
+                    <h5 class="text-muted">Administrativo</h5>
                     <hr>
-                    <h5 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?></strong></h5>
-                    <label for="estado">Acción</label>
-                    <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
-                        <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
-                    <?php } elseif ($voluntario->obtener_estado() === 'rechazado') { ?>
-                        <strong>Contactar con soporte</strong>
-                   <?php  } ?>
+                    <h6 class="text-muted">Estado: <strong><?php echo $voluntario->obtener_estado(); ?>
+
+                            <?php if ($voluntario->obtener_estado() === 'habilitado') { ?>
+                                <button type="button" value="deshabilitado" onclick="cambiarestado(this.value)" class="btn btn-outline-danger">Deshabilitar</button>
+                            <?php } else{ ?>
+                                <strong>Contactar con soporte</strong>
+                            <?php } ?>
+                                
+                        </strong>
+                    </h6>
+                    
+                    <h6 for="tipoUsuario">Tipo de Usuario
+                        <select class="form-select-sm" style=" width: 200px;  /* Ancho personalizado */height: 35px;  /* Altura personalizada */font-size: 12px;  /* Tamaño de fuente */padding: 4px;  /* Espaciado interno */border-radius: 5px;  /* Bordes redondeados */border: 1px solid #ccc;  /* Borde con color gris claro */" 
+                        id="tipoUsuario" name="tipoUsuario" onchange="Mostrarbtn()">
+                            <option value="Voluntario" <?php echo $voluntario->obtener_TypeUser() == 'Voluntario' ? 'selected' : ''; ?>>Voluntario</option>
+                            <option value="Coordinador" <?php echo $voluntario->obtener_TypeUser() == 'Coordinador' ? 'selected' : ''; ?>>Coordinador regional</option>
+                            <option value="EqReg" <?php echo $voluntario->obtener_TypeUser() == 'EqReg' ? 'selected' : ''; ?>>Equipo regional</option>
+                        </select>
+                    </h6>
+                    <?php
+                     if($voluntario->obtener_TypeUser() == 'Coordinador'){
+                        echo ' <h6 id="SelectorConsejo"for="seleccionconsejo">Elegir consejo';
+                     }else{
+                        echo ' <h6 id="SelectorConsejo" hidden for="seleccionconsejo">Elegir consejo';
+                     } ?>
+                   
+                        <select name="region" id="SelectorConsejo2">
+                            <option value=""></option>
+                            <?php foreach ($regiones as $region): ?>
+                                <option value="<?php echo $region['id']; ?>"
+                                    <?php echo ($region['id_coordinador'] == $voluntario->obtener_id()) ? 'selected' : ''; ?>>
+                                    <?php echo $region['nombre']; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </h6>
+                    <button type="button" id="btnConTip" onclick="cambTyUs()" hidden class="btn  btn-warning">Cambiar</button>
+                   
                 </div>
                 <div class="col-md-6 text-center">
 
