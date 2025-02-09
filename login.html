@@ -40,11 +40,43 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>Estamos en Mantenimiento</h1>
-        <p>Por favor, vuelve más tarde. Estamos trabajando para mejorar nuestro servicio.</p>
-        <div class="footer">
-            <p>&copy; 2025</p>
+    <div style='text-align: center; margin-top: 50px;'>
+        <img src='img/cnrd.png' alt='Logo CNRD' style='width: 200px; margin-bottom: -75px;'>
+        <div style='font-family: Arial, sans-serif;'>
+
+        </div>
+    </div>
+    <div id="loader" style=" text-align: center; display:none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Cargando...</span>
+        </div>
+        <p>Enviando datos, por favor espera...</p>
+    </div>
+    <div id="Contenedor">
+
+        <div class="container mt-5">
+            <h2 class="text-center">Inicio de sesión</h2>
+            <form action="" method="post" id="formulario" name="formulario" class="container-sm col-5">
+                <div class="form-group">
+                    <label for="usuario">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario">
+                </div>
+                <div class="form-group">
+                    <label for="clave">Contraseña:</label>
+                    <input type="password" class="form-control" name="clave" id="clave">
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Ingreso:</label>
+                    <select class="form-control" name="tipo" id="tipo">
+                        <option value="voluntario">Voluntario</option>
+                        <option value="Coordinacion">Coordinacion</option>
+                        <option value="Clinica">Clinica</option>
+                    </select>
+                </div>
+                <div class="form-group text-center mt-4">
+                    <button type="button" id="btnIniciar" class="btn btn-primary btn-block">Iniciar sesión</button>
+                </div>
+            </form>
         </div>
     </div>
 

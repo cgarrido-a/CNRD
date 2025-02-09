@@ -65,7 +65,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                     <a class="nav-link" href="<?php echo $ruta. 'miperfil.php'; ?>">Mi Perfil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="cerrar_sesion.php">Cerrar Sesión</a>
+                    <a class="nav-link" href="/CNRD/cerrar_sesion.php">Cerrar Sesión</a>
                 </li>
             </ul>
         </div>
