@@ -24,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $response['error'] = $resultado['error'];
             } else {
                 // ✅ Guardar SIEMPRE el ID del usuario en la sesión
-                $_SESSION['user_id'] = $resultado['id']; // Guardamos el ID
-                $_SESSION['TypeUser'] = $resultado['TypeUser']; // Guardamos el tipo de usuario
+                $_SESSION['user_id'] = $_SESSION['UserLog']->obtener_id(); // Guardamos el ID
+                $_SESSION['TypeUser'] =$_SESSION['UserLog']->obtener_TypeUser(); // Guardamos el tipo de usuario
                 $_SESSION['user'] = $resultado; // Guardamos todos los datos del usuario
 
                 $response['success'] = true;

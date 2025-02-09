@@ -5,44 +5,44 @@ include_once('class.inc.php');
 class Clinicas
 {
     public static function guardar_clinica($nombreClinica, $tipo, $direccion, $id_region, $correo, $clave)
-{
-    try {
-        $pdo = Database::connect();
-        $contrasenaHashed = password_hash($clave, PASSWORD_BCRYPT);
-        
-        $query = "INSERT INTO ubicaciones (id_region, tipo, direccion, email, password, nombre) 
+    {
+        try {
+            $pdo = Database::connect();
+            $contrasenaHashed = password_hash($clave, PASSWORD_BCRYPT);
+
+            $query = "INSERT INTO ubicaciones (id_region, tipo, direccion, email, password, nombre) 
                   VALUES (:id_region, :tipo, :direccion, :correo, :clave, :nombreClinica)";
 
-        $stmt = $pdo->prepare($query);
-        $stmt->bindParam(':id_region', $id_region, PDO::PARAM_INT);
-        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_STR);
-        $stmt->bindParam(':direccion', $direccion, PDO::PARAM_STR);
-        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
-        $stmt->bindParam(':clave', $contrasenaHashed, PDO::PARAM_STR);
-        $stmt->bindParam(':nombreClinica', $nombreClinica, PDO::PARAM_STR);
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':id_region', $id_region, PDO::PARAM_INT);
+            $stmt->bindParam(':tipo', $tipo, PDO::PARAM_STR);
+            $stmt->bindParam(':direccion', $direccion, PDO::PARAM_STR);
+            $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+            $stmt->bindParam(':clave', $contrasenaHashed, PDO::PARAM_STR);
+            $stmt->bindParam(':nombreClinica', $nombreClinica, PDO::PARAM_STR);
 
-        $stmt->execute();
+            $stmt->execute();
 
-        $nuevaClinicaId = $pdo->lastInsertId(); // Obtener el ID de la nueva clínica
+            $nuevaClinicaId = $pdo->lastInsertId(); // Obtener el ID de la nueva clínica
 
-        return [
-            'success' => true,
-            'id' => $nuevaClinicaId,
-            'nombreClinica' => $nombreClinica,
-            'tipo' => $tipo,
-            'direccion' => $direccion,
-            'id_region' => $id_region,
-            'correo' => $correo
-        ];
-    } catch (PDOException $e) {
-        return [
-            'success' => false,
-            'message' => 'Error al agregar la clínica: ' . $e->getMessage()
-        ];
+            return [
+                'success' => true,
+                'id' => $nuevaClinicaId,
+                'nombreClinica' => $nombreClinica,
+                'tipo' => $tipo,
+                'direccion' => $direccion,
+                'id_region' => $id_region,
+                'correo' => $correo
+            ];
+        } catch (PDOException $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al agregar la clínica: ' . $e->getMessage()
+            ];
+        }
     }
-}
 
-    
+
     public static function generarCadena($idClinica)
     {
         if (!is_numeric($idClinica) || $idClinica <= 0) {
