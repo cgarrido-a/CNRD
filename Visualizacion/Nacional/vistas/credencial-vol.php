@@ -111,8 +111,8 @@ $pdf->Rect($credencialX, $credencialY, 54, 86, 'DF');
 $pdf->Image(__DIR__ . '/../../../img/cnrd.png', $credencialX + 14, $credencialY - 2, 25);
 
 // Foto de perfil
-if ($fotoperfil && file_exists(__DIR__ . '/../../..' . $fotoperfil)) {
-    $perfilPath = __DIR__ . '/../../..' . $fotoperfil;
+if ($fotoperfil && file_exists(__DIR__ .  $fotoperfil)) {
+    $perfilPath = __DIR__ .  $fotoperfil;
     $pdf->Image($perfilPath, $credencialX + 17, $credencialY + 23.5, 20, 26.6669);
 }
 

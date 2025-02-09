@@ -38,7 +38,7 @@
           <div class="modal-body">
             <div class="form-group">
               <label for="nombre">Nombre Completo</label>
-              <input type="text" class="form-control" maxlength="23" id="nombrecred" name="nombre" required value="<?php echo htmlspecialchars(substr($voluntario['nombre'], 0, 23)); ?>">
+              <input type="text" class="form-control" maxlength="23" id="nombrecred" name="nombre" required value="<?php echo htmlspecialchars(substr($voluntario->obtener_nombre(), 0, 23)); ?>">
             </div>
             <!-- RUT OK -->
             <div class="form-group">

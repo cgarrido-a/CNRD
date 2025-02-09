@@ -10,6 +10,8 @@ session_start();
 $ruta = '';
 include_once('../plantillas/DecInc.inc.php');
 echo $_SESSION['UserLog']->obtener_TypeUser();
+
+$voluntario = Voluntarios::obtenerVoluntarioPorId($_SESSION['UserLog']->obtener_id());
 foreach (glob("../modales/*.php") as $archivo) {
     include_once $archivo;
 }

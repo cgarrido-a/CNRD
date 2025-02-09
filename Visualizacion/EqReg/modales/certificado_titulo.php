@@ -8,7 +8,7 @@
       <div class="modal-body">
         <form action="../src/savearchmp.php" method="post" enctype="multipart/form-data">
           <div class="modal-body">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($voluntario['id']); ?>">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($voluntario->obtener_id()); ?>">
             <input type="file" class="form-control-file" id="newCertificadoTitulo" name="newCertificadoTitulo">
           </div>
           <div class="modal-footer">
