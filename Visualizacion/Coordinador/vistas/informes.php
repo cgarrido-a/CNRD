@@ -31,7 +31,6 @@ $informes = $voluntario->obtenerInformes() ?? [];
         </a>
     </div>
 
-
     <table class="table table-striped table-bordered mt-3">
         <thead class="table-dark">
             <tr>
@@ -57,8 +56,9 @@ $informes = $voluntario->obtenerInformes() ?? [];
                     echo "<td>" . htmlspecialchars($informe->comuna) . "</td>";
                     echo "<td>" . htmlspecialchars($informe->tipo_evento) . "</td>";
                     echo "<td>" . htmlspecialchars($informe->categoria) . "</td>";
-                    echo "<td>";
-                    echo "<a href='verInforme.php?id=" . htmlspecialchars($informe->id) . "' class='btn btn-sm btn-primary'>Ver</a>";
+                    echo "<td class='d-flex'>";
+                    echo "<a href='verInforme.php?id=" . htmlspecialchars($informe->id) . "' class='btn btn-sm btn-primary me-2'><i class='fas fa-eye'></i> Ver</a>";
+                    echo "<a href='editarInforme.php?id=" . htmlspecialchars($informe->id) . "' class='btn btn-sm btn-warning'><i class='fas fa-edit'></i> Editar</a>";
                     echo "</td>";
                     echo "</tr>";
                 }
@@ -76,3 +76,4 @@ $informes = $voluntario->obtenerInformes() ?? [];
 <?php
 include_once('../plantillas/DecFin.inc.php');
 ?>
+
