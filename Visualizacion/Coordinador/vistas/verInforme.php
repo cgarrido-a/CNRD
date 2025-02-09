@@ -2,7 +2,6 @@
 require_once __DIR__ . "/../../../app/class.inc.php";
 
 session_start();
-include_once('../plantillas/DecFin.inc.php');
 include_once('../plantillas/LLamstan.inc.php');
 
 if (!isset($_SESSION['UserLog'])) {
