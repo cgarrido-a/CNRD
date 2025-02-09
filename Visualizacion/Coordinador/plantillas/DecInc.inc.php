@@ -56,7 +56,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                         <!-- <li><a class="dropdown-item" href="<?php echo $ruta. 'HisAsis.php'; ?>">Historial asistencia</a></li> -->
                     </ul>
                 </li>
-                <li class="nav-item">
+                <li hidden class="nav-item">
                     <a class="nav-link" href="<?php echo $ruta . 'informes.php'; ?>">Informe</a>
                 </li>
                 <li class="nav-item">

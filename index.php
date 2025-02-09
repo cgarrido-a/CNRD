@@ -23,4 +23,6 @@ include_once($ruta2 . 'plantillas/LLamstan.inc.php');
 
 $ruta =  'Visualizacion/'.$type.'/vistas/';
 include_once($ruta2 . 'plantillas/DecInc.inc.php');
+echo date('Y-m-d H:i:s');
+include_once($ruta2 . 'plantillas/DecFin.inc.php');
 ?>

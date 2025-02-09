@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En Mantenimiento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div style='text-align: center; margin-top: 50px;'>
+        <img src='img/cnrd.png' alt='Logo CNRD' style='width: 200px; margin-bottom: -75px;'>
+        <div style='font-family: Arial, sans-serif;'>
+
+        </div>
+    </div>
+    <div id="loader" style=" text-align: center; display:none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Cargando...</span>
+        </div>
+        <p>Enviando datos, por favor espera...</p>
+    </div>
+    <div id="Contenedor">
+
+        <div class="container mt-5">
+            <h2 class="text-center">Inicio de sesión</h2>
+            <form action="" method="post" id="formulario" name="formulario" class="container-sm col-5">
+                <div class="form-group">
+                    <label for="usuario">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario">
+                </div>
+                <div class="form-group">
+                    <label for="clave">Contraseña:</label>
+                    <input type="password" class="form-control" name="clave" id="clave">
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Ingreso:</label>
+                    <select class="form-control" name="tipo" id="tipo">
+                        <option value="voluntario">Voluntario</option>
+                        <option value="Coordinacion">Coordinacion</option>
+                        <option value="Clinica">Clinica</option>
+                    </select>
+                </div>
+                <div class="form-group text-center mt-4">
+                    <button type="button" id="btnIniciar" class="btn btn-primary btn-block">Iniciar sesión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -234,40 +234,40 @@ class Usuario
         }
     }
     public static function ActCon($id_consejo, $id_coordinador)
-{
-    try {
-        $pdo = Database::connect();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    {
+        try {
+            $pdo = Database::connect();
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // 1. Obtener el id_coordinador anterior
-        $sql_get_old = "SELECT id_coordinador FROM Consejos WHERE region_id = :consejoId";
-        $stmt = $pdo->prepare($sql_get_old);
-        $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
-        $stmt->execute();
-        $old_id_coordinador = $stmt->fetchColumn();
-
-        // 2. Si el id_coordinador anterior es mayor a 0, actualizar en voluntarios
-        if ($old_id_coordinador > 0) {
-            $sql_update_voluntario = "UPDATE voluntarios SET TypeUser = 'Voluntario' WHERE ID = :oldCoordinador";
-            $stmt = $pdo->prepare($sql_update_voluntario);
-            $stmt->bindParam(':oldCoordinador', $old_id_coordinador, PDO::PARAM_INT);
+            // 1. Obtener el id_coordinador anterior
+            $sql_get_old = "SELECT id_coordinador FROM Consejos WHERE region_id = :consejoId";
+            $stmt = $pdo->prepare($sql_get_old);
+            $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
             $stmt->execute();
+            $old_id_coordinador = $stmt->fetchColumn();
+
+            // 2. Si el id_coordinador anterior es mayor a 0, actualizar en voluntarios
+            if ($old_id_coordinador > 0) {
+                $sql_update_voluntario = "UPDATE voluntarios SET TypeUser = 'Voluntario' WHERE ID = :oldCoordinador";
+                $stmt = $pdo->prepare($sql_update_voluntario);
+                $stmt->bindParam(':oldCoordinador', $old_id_coordinador, PDO::PARAM_INT);
+                $stmt->execute();
+            }
+
+            // 3. Actualizar el id_coordinador en Consejos
+            $sql_update_consejo = "UPDATE Consejos SET id_coordinador = :nuevoCoordinador WHERE region_id = :consejoId";
+            $stmt = $pdo->prepare($sql_update_consejo);
+            $stmt->bindParam(':nuevoCoordinador', $id_coordinador, PDO::PARAM_INT);
+            $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
+            $resultado = $stmt->execute();
+
+            return $resultado ? true : false;
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
+        } finally {
+            $pdo = null;
         }
-
-        // 3. Actualizar el id_coordinador en Consejos
-        $sql_update_consejo = "UPDATE Consejos SET id_coordinador = :nuevoCoordinador WHERE region_id = :consejoId";
-        $stmt = $pdo->prepare($sql_update_consejo);
-        $stmt->bindParam(':nuevoCoordinador', $id_coordinador, PDO::PARAM_INT);
-        $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
-        $resultado = $stmt->execute();
-
-        return $resultado ? true : false;
-    } catch (PDOException $e) {
-        return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
-    } finally {
-        $pdo = null;
     }
-}
 
     public static function ObtenerConsejos($id)
     {
@@ -290,7 +290,7 @@ class Usuario
                             "nombre" => htmlspecialchars($fila['Nombre']),
                             "correo" => htmlspecialchars($fila['Correo']),
                             "clave" => htmlspecialchars($fila['Clave']),
-                            "id_coordinador" => htmlspecialchars($fila['id_coordinador']??'')
+                            "id_coordinador" => htmlspecialchars($fila['id_coordinador'] ?? '')
                         ];
                     }
                 }
@@ -785,68 +785,72 @@ class Voluntarios
         $id_region = $_SESSION['UserLog']->obtener_id_region();
 
         try {
-
-
+            // Verificar el tipo de usuario
             if ($_SESSION['UserLog']->obtener_TypeUser() != 'Nacional') {
+                // Para usuarios no nacionales, filtrar por región
                 $sql = "SELECT 
-                ubicaciones.id_region AS id_region,
-                ubicaciones.nombre AS nombre,
-                ubicaciones.Direccion AS ubicacion,
-                voluntarios.tipo_alimentacion AS alimentacion,
-                COUNT(voluntarios.id) AS total,
-                GROUP_CONCAT(DISTINCT CASE 
-                    WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
-                    AND TRIM(voluntarios.enfermedades_cronicas) != '' 
-                    AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
-                    THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
-                    ELSE NULL END 
-                SEPARATOR ', ') AS voluntarios_con_enfermedades
-            FROM 
-                asistencia
-            INNER JOIN 
-                ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
-            INNER JOIN 
-                voluntarios ON asistencia.id_voluntario = voluntarios.id
-            WHERE 
-                ubicaciones.id_region = :id_region
-            GROUP BY 
-                ubicaciones.Direccion, voluntarios.tipo_alimentacion
-            ORDER BY 
-                ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
+                        ubicaciones.id_region AS id_region,
+                        ubicaciones.nombre AS nombre,
+                        ubicaciones.Direccion AS ubicacion,
+                        voluntarios.tipo_alimentacion AS alimentacion,
+                        COUNT(*) AS total_entrada_sin_salida,  -- Contar solo los que tienen 'Entrada' pero no 'Salida'
+                        COUNT(voluntarios.id) AS total,  -- Total general de voluntarios
+                        GROUP_CONCAT(DISTINCT CASE 
+                            WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
+                            AND TRIM(voluntarios.enfermedades_cronicas) != '' 
+                            AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
+                            THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
+                            ELSE NULL END 
+                        SEPARATOR ', ') AS voluntarios_con_enfermedades
+                    FROM 
+                        asistencia
+                    INNER JOIN 
+                        ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
+                    INNER JOIN 
+                        voluntarios ON asistencia.id_voluntario = voluntarios.id
+                    WHERE 
+                        ubicaciones.id_region = :id_region
+                        AND asistencia.Entrada IS NOT NULL  -- Asegurar que la entrada esté marcada
+                        AND asistencia.Salida IS NULL  -- Asegurar que no haya salida registrada
+                    GROUP BY 
+                        ubicaciones.Direccion, voluntarios.tipo_alimentacion
+                    ORDER BY 
+                        ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
 
                 $stmt = $conexion->prepare($sql);
-
-                // Vincular el parámetro :id_region con el valor obtenido de la sesión
                 $stmt->bindParam(':id_region', $id_region, PDO::PARAM_INT);
             } else {
+                // Para usuarios tipo Nacional, no se filtra por región
                 $sql = "SELECT 
-                ubicaciones.id_region AS id_region,
-                ubicaciones.nombre AS nombre,
-                ubicaciones.Direccion AS ubicacion,
-                voluntarios.tipo_alimentacion AS alimentacion,
-                COUNT(voluntarios.id) AS total,
-                GROUP_CONCAT(DISTINCT CASE 
-                    WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
-                    AND TRIM(voluntarios.enfermedades_cronicas) != '' 
-                    AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
-                    THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
-                    ELSE NULL END 
-                SEPARATOR ', ') AS voluntarios_con_enfermedades
-            FROM 
-                asistencia
-            INNER JOIN 
-                ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
-            INNER JOIN 
-                voluntarios ON asistencia.id_voluntario = voluntarios.id
-                
-            GROUP BY 
-                ubicaciones.Direccion, voluntarios.tipo_alimentacion
-            ORDER BY 
-                ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
+                        ubicaciones.id_region AS id_region,
+                        ubicaciones.nombre AS nombre,
+                        ubicaciones.Direccion AS ubicacion,
+                        voluntarios.tipo_alimentacion AS alimentacion,
+                        COUNT(*) AS total_entrada_sin_salida,  -- Contar solo los que tienen 'Entrada' pero no 'Salida'
+                        COUNT(voluntarios.id) AS total,  -- Total general de voluntarios
+                        GROUP_CONCAT(DISTINCT CASE 
+                            WHEN voluntarios.enfermedades_cronicas IS NOT NULL 
+                            AND TRIM(voluntarios.enfermedades_cronicas) != '' 
+                            AND LOWER(TRIM(voluntarios.enfermedades_cronicas)) NOT IN ('ninguna', 'ninguno') 
+                            THEN CONCAT(voluntarios.nombre, ' (', voluntarios.enfermedades_cronicas, ')') 
+                            ELSE NULL END 
+                        SEPARATOR ', ') AS voluntarios_con_enfermedades
+                    FROM 
+                        asistencia
+                    INNER JOIN 
+                        ubicaciones ON asistencia.id_ubicacion = ubicaciones.ID
+                    INNER JOIN 
+                        voluntarios ON asistencia.id_voluntario = voluntarios.id
+                    WHERE 
+                        asistencia.Entrada IS NOT NULL  -- Asegurar que la entrada esté marcada
+                        AND asistencia.Salida IS NULL  -- Asegurar que no haya salida registrada
+                    GROUP BY 
+                        ubicaciones.Direccion, voluntarios.tipo_alimentacion
+                    ORDER BY 
+                        ubicaciones.Direccion, voluntarios.tipo_alimentacion;";
 
                 $stmt = $conexion->prepare($sql);
             }
-
 
             $stmt->execute();
 
@@ -861,15 +865,17 @@ class Voluntarios
                     $ubicacion = $fila['ubicacion'];
                     $alimentacion = $fila['alimentacion'];
                     $total = $fila['total'];
+                    $total_entrada_sin_salida = $fila['total_entrada_sin_salida'];  // Total de "Entrada" sin "Salida"
                     $voluntarios_con_enfermedades = $fila['voluntarios_con_enfermedades'];
 
                     // Asegurarse de inicializar la ubicación si no existe
                     if (!isset($datos[$ubicacion])) {
                         $datos[$ubicacion] = [
-                            'tipos_alimentacion' => [], // Almacena tipos de alimentación
+                            'tipos_alimentacion' => [],  // Almacena tipos de alimentación
                             'nombre' => $nombre,
                             'id_region' => $id_region,
-                            'voluntarios_con_enfermedades' => [] // Almacena los nombres y enfermedades de los voluntarios
+                            'voluntarios_con_enfermedades' => [],  // Almacena los nombres y enfermedades de los voluntarios
+                            'total_entrada_sin_salida' => 0  // Inicializar el total de entrada sin salida
                         ];
                     }
 
@@ -880,6 +886,9 @@ class Voluntarios
                     if (!empty($voluntarios_con_enfermedades)) {
                         $datos[$ubicacion]['voluntarios_con_enfermedades'] = explode(', ', $voluntarios_con_enfermedades);
                     }
+
+                    // Almacenar el total de voluntarios con "Entrada" pero sin "Salida"
+                    $datos[$ubicacion]['total_entrada_sin_salida'] = $total_entrada_sin_salida;
                 }
             }
         } catch (PDOException $ex) {
@@ -890,6 +899,8 @@ class Voluntarios
         // Retorna el arreglo organizado
         return $datos;
     }
+
+
 
     public static function ObtenerCertificados($id)
     {

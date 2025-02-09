@@ -75,7 +75,7 @@ class Registroo
                         :experiencia_otra_emergencia, 
                         :recursos_propios, 
                         :hobbys, 
-                        NOW(), 
+                        :hora, 
                         :tipo_alimentacion, 
                         :enfermedades_cronicas, 
                         :areaDesempeno, 
@@ -96,6 +96,7 @@ class Registroo
             $stmtInsertar->bindValue(':experiencia_otra_emergencia', $experienciaOtraEmergencia);
             $stmtInsertar->bindValue(':recursos_propios', $recursosPropios);
             $stmtInsertar->bindValue(':hobbys', $hobbys);
+            $stmtInsertar->bindValue(':hora', date('Y-m-d H:i:s'));
             $stmtInsertar->bindValue(':tipo_alimentacion', $tipo_aliemntacion);
             $stmtInsertar->bindValue(':enfermedades_cronicas', $enfer_cronicas);
             $stmtInsertar->bindValue(':grupo_sanguineo', $grupo_sanguineo);
