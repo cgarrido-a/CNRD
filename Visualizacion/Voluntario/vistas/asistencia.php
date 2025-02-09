@@ -17,10 +17,7 @@ $ruta ='';
 
 include_once('../plantillas/DecInc.inc.php');
 
-foreach (glob("../modales/*.php") as $archivo) {
-    include_once $archivo;
 
-}
 ?>
 
 <div class="container px-3 py-4">

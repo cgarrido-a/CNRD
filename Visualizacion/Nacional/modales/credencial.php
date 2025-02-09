@@ -6,7 +6,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <?php
-      if ($credencial) {
+      if (isset($credencial)) {
       ?>
         <form class="form">
           <div class="modal-body">

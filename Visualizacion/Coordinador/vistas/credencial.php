@@ -68,7 +68,7 @@ class PDF_Rotate extends FPDF
 
 // Obtener información del usuario o voluntario
 $id = $_SESSION['UserLog']->obtener_id();
-$id_formateado = $id;
+$id_formateado = 'V-'-$id;
 
 $id = $_SESSION['UserLog']->obtener_id();
 $usuario = Usuario::get_cedusuario($id);

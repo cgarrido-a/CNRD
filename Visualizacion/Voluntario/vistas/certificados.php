@@ -17,9 +17,6 @@ $ruta = '';
 
 include_once('../plantillas/DecInc.inc.php');
 
-foreach (glob("../modales/*.php") as $archivo) {
-    include_once $archivo;
-}
 $certificados = Voluntarios::ObtenerCertificados($_SESSION['UserLog']->obtener_id());
 ?>
 <div class="container mt-5">

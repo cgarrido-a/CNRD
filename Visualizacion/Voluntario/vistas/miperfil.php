@@ -2,13 +2,16 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_DEPRECATED);
+//HAY QUE CORREGIR CON LOS CAMBIOS EN LA BASE DE DATOS
 
 include_once('../plantillas/LLamstan.inc.php');
 session_start();
 
 $ruta = '';
-$credencial=Usuario::get_cedusuario($_SESSION['UserLog']->obtener_id());
 include_once('../plantillas/DecInc.inc.php');
+echo $_SESSION['UserLog']->obtener_TypeUser();
+$institucion = 'CNRD ' . $_SESSION['UserLog']->obtener_id_region();
+$voluntario = Voluntarios::obtenerVoluntarioPorId($_SESSION['UserLog']->obtener_id());
 foreach (glob("../modales/*.php") as $archivo) {
     include_once $archivo;
 }
@@ -51,7 +54,7 @@ foreach (glob("../modales/*.php") as $archivo) {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="btnCambiarClave" class="font-weight-bold"><strong>Clave</strong></label>
-                            <button type="button" id="btnCambiarClave" class="btn btn-outline-warning btn-block">Cambiar Clave</button>
+                            <button type="button" id="btnCambiarClave" class="btn btn-warning btn-block">Cambiar Clave</button>
                         </div>
 
                         <!-- Región -->
@@ -66,17 +69,6 @@ foreach (glob("../modales/*.php") as $archivo) {
                             <p id="consejoRegional" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_comuna()); ?></p>
                         </div>
 
-                        <!-- Profesión -->
-                        <div class="col-md-6 mb-3">
-                            <label for="profesion" class="font-weight-bold"><strong>Profesión</strong></label>
-                            <p id="profesion" class="form-control-plaintext"><?php echo htmlspecialchars($_SESSION['UserLog']->obtener_profesion()); ?></p>
-                        </div>
-
-                        <!-- Certificado de Antecedentes -->
-                        <div class="col-md-6 mb-3">
-                            <label for="certificadoAntecedentes" class="font-weight-bold"><strong>Certificado de Antecedentes</strong></label>
-                            <button id="btnNuevoCertificado" type="button" class="btn btn-outline-secondary mt-2" data-toggle="modal" data-target="#modalCertificadoTitulo">Nuevo Certificado de Titulo/Alumno regular</button>
-                        </div>
 
                     </div>
                 </div>

@@ -271,6 +271,7 @@ class Usuario
 
             if (count($resultado)) {
                 foreach ($resultado as $fila) {
+
                     if ($fila['Nombre'] != 'Nacional') {
                         $regiones[] = [
                             "id" => htmlspecialchars($fila['ID']),
@@ -278,7 +279,7 @@ class Usuario
                             "nombre" => htmlspecialchars($fila['Nombre']),
                             "correo" => htmlspecialchars($fila['Correo']),
                             "clave" => htmlspecialchars($fila['Clave']),
-                            "id_coordinador" => htmlspecialchars($fila['id_coordinador'])
+                            "id_coordinador" => htmlspecialchars($fila['id_coordinador']??'')
                         ];
                     }
                 }
@@ -884,7 +885,7 @@ class Voluntarios
         $conexion = Database::connect();
         $certificados = [];
         try {
-            $sql = "SELECT * FROM certificados WHERE id_voluntario = :id";
+            $sql = "SELECT * FROM Certificados WHERE id_voluntario = :id";
             $stmt = $conexion->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
