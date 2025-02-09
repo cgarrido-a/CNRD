@@ -402,7 +402,7 @@ class Usuario
                         );
                         break;
                     case 'Coordinacion':
-                        $_SESSION['user_id'] = htmlspecialchars($user['id']);
+                        $_SESSION['user_id'] = htmlspecialchars($user['ID']);
                         $_SESSION['user_name'] = htmlspecialchars($user['nombre']);
                         $_SESSION['user_email'] = htmlspecialchars($user['correo']);
                         $_SESSION['user_type'] = $type;
@@ -410,7 +410,7 @@ class Usuario
 
 
                         $_SESSION['UserLog'] = new Consejo(
-                            htmlspecialchars($user['id']),
+                            htmlspecialchars($user['ID']),
                             htmlspecialchars($user['region_id']),
                             htmlspecialchars($user['nombre']),
                             htmlspecialchars($user['correo']),
