@@ -1168,14 +1168,14 @@ class Voluntarios
 
         try {
             // Verificar si hay un registro de entrada sin salida
-            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
-                         WHERE voluntario_id = :voluntario_id 
-                         AND lugar_id = :lugar_id 
-                         AND fecha_hora_salida IS NULL 
-                         ORDER BY fecha_hora_entrada DESC LIMIT 1";
+            $sqlCheck = "SELECT id FROM asistencia 
+                         WHERE id_voluntario = :voluntario_id 
+                         AND id_ubicacion = :id_ubicacion 
+                         AND Salida IS NULL 
+                         ORDER BY Entrada DESC LIMIT 1";
             $stmt = $conn->prepare($sqlCheck);
             $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
+            $stmt->bindParam(':id_ubicacion', $lugarId);
             $stmt->execute();
 
             if ($stmt->rowCount() === 0) {
@@ -1187,11 +1187,11 @@ class Voluntarios
             $registroId = $registro['id'];
 
             // Actualizar la fecha y hora de salida
-            $sqlUpdate = "UPDATE RegistroEntradasSalidas 
-                          SET fecha_hora_salida = :fecha_hora_salida 
+            $sqlUpdate = "UPDATE asistencia 
+                          SET Salida = :Salida 
                           WHERE id = :id";
             $stmt = $conn->prepare($sqlUpdate);
-            $stmt->bindParam(':fecha_hora_salida', $fechaActual);
+            $stmt->bindParam(':Salida', $fechaActual);
             $stmt->bindParam(':id', $registroId);
             $stmt->execute();
 
@@ -1215,13 +1215,13 @@ class Voluntarios
         try {
 
             // Verificar si ya existe una entrada sin salida para este voluntario
-            $sqlCheck = "SELECT id FROM RegistroEntradasSalidas 
-                         WHERE voluntario_id = :voluntario_id 
-                         AND lugar_id = :lugar_id 
-                         AND fecha_hora_salida IS NULL";
+            $sqlCheck = "SELECT id FROM asistencia 
+                         WHERE id_voluntario = :voluntario_id 
+                         AND id_ubicacion = :id_ubicacion 
+                         AND Salida IS NULL";
             $stmt = $conn->prepare($sqlCheck);
             $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
+            $stmt->bindParam(':id_ubicacion', $lugarId);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
@@ -1229,12 +1229,12 @@ class Voluntarios
             }
 
             // Insertar la nueva entrada
-            $sqlInsert = "INSERT INTO RegistroEntradasSalidas (voluntario_id, lugar_id, fecha_hora_entrada) 
-                          VALUES (:voluntario_id, :lugar_id, :fecha_hora_entrada)";
+            $sqlInsert = "INSERT INTO asistencia (id_voluntario, id_ubicacion, Entrada) 
+                          VALUES (:voluntario_id, :id_ubicacion, :Entrada)";
             $stmt = $conn->prepare($sqlInsert);
             $stmt->bindParam(':voluntario_id', $voluntarioId);
-            $stmt->bindParam(':lugar_id', $lugarId);
-            $stmt->bindParam(':fecha_hora_entrada', $fechaActual);
+            $stmt->bindParam(':id_ubicacion', $lugarId);
+            $stmt->bindParam(':Entrada', $fechaActual);
             $stmt->execute();
 
             return "Entrada registrada exitosamente.";

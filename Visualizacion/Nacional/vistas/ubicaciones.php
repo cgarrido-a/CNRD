@@ -86,7 +86,7 @@ $clinicas = Clinicas::get_clinicas();
             <input type="text" id="filtroNombre" class="form-control" placeholder="Nombre de Clínica" onkeyup="filtrarTabla()">
         </div>
         <?php
-        if ($_SESSION['region'] === "Nacional") {
+        if ($_SESSION['UserLog']->obtener_TypeUser() === "Nacional") {
         ?>
             <div class="col-md">
                 <select id="filtroRegion" class="form-control" onchange="filtrarTabla()">

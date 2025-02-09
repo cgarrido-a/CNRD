@@ -48,7 +48,7 @@ class Registroo
                         correo, 
                         clave, 
                         profesion, 
-                        region, 
+                        id_region, 
                         comuna, 
                         experiencia_voluntario, 
                         experiencia_otra_emergencia, 

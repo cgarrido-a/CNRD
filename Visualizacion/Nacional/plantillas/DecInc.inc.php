@@ -56,6 +56,9 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                     </ul>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="<?php echo $ruta. 'ubicaciones.php?id='  ?>">Ubicaciones</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="<?php echo $ruta. 'MiCredencial.php?id=' . $_SESSION['user_id'] ?>">Mi Credencial</a>
                 </li>
             </ul>
@@ -64,7 +67,7 @@ $servidor = 'http://cnrd-intranet.free.nf/'
                     <a class="nav-link" href="<?php echo $ruta. 'miperfil.php'; ?>">Mi Perfil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/CNRD/cerrar_sesion.php">Cerrar Sesión</a>
+                    <a class="nav-link" href="../../../cerrar_sesion.php">Cerrar Sesión</a>
                 </li>
             </ul>
         </div>

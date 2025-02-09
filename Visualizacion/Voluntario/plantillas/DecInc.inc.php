@@ -27,7 +27,7 @@ $servidor = 'http://cnrd-intranet.free.nf/';
     <!-- Custom CSS -->
     <link rel="stylesheet" href="app/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/fontawesome.min.css" integrity="sha512-v8QQ0YQ3H4K6Ic3PJkym91KoeNT5S3PnDKvqnwqFD1oiqIl653crGZplPdU5KKtHjO0QKcQ2aUlQZYjHczkmGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="js/qrCode.min.js"></script>
+    <script src="../../../js/qrCode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -55,7 +55,7 @@ $servidor = 'http://cnrd-intranet.free.nf/';
                     <a class="nav-link" href="<?php echo $ruta .'miperfil.php' ?>">Mi Perfil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/CNRD/cerrar_sesion.php">Cerrar Sesión</a>
+                    <a class="nav-link" href="../../../cerrar_sesion.php">Cerrar Sesión</a>
                 </li>
             </ul>
         </div>

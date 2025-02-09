@@ -24,6 +24,7 @@ if (!isset($_GET['id']) || !isset($_GET['nombre'])) {
 // Obtener parámetros
 $idClinica = htmlspecialchars($_GET['id']); // Validar el ID de la clínica
 $nombreClinica = htmlspecialchars($_GET['nombre']); // Evitar inyecciones XSS
+$idClinica = Clinicas::generarCadena(intval($_GET['id'])    );
 
 // Configurar QR
 $contenidoQR = $idClinica;

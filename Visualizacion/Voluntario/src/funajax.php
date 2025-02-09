@@ -51,8 +51,7 @@ switch ($_POST['variable']) {
             $voluntarioId = intval($_POST['id']);
             $lugarId = $_POST['valor'];
             $accion = $_POST['accion'];
-            echo '<br>' . $voluntarioId;
-            echo '<br>' . $lugarId;
+          
             if ($voluntarioId && $lugarId) {
                 switch ($accion) {
                     case 'cerrar':
