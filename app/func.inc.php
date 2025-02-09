@@ -234,30 +234,41 @@ class Usuario
         }
     }
     public static function ActCon($id_consejo, $id_coordinador)
-    {
-        try {
-            $pdo = Database::connect();
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+{
+    try {
+        $pdo = Database::connect();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Definir la consulta para actualizar el estado de habilitación
-            $sql = "UPDATE consejos SET id_coordinador = :habilitacion WHERE id = :clinicaId";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':habilitacion', $id_coordinador, PDO::PARAM_INT);
-            $stmt->bindParam(':clinicaId', $id_consejo, PDO::PARAM_INT);
+        // 1. Obtener el id_coordinador anterior
+        $sql_get_old = "SELECT id_coordinador FROM Consejos WHERE region_id = :consejoId";
+        $stmt = $pdo->prepare($sql_get_old);
+        $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
+        $stmt->execute();
+        $old_id_coordinador = $stmt->fetchColumn();
 
-            // Ejecutar la consulta
-            $resultado = $stmt->execute();
-            if ($resultado) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (PDOException $e) {
-            return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
-        } finally {
-            $pdo = null;
+        // 2. Si el id_coordinador anterior es mayor a 0, actualizar en voluntarios
+        if ($old_id_coordinador > 0) {
+            $sql_update_voluntario = "UPDATE voluntarios SET TypeUser = 'Voluntario' WHERE ID = :oldCoordinador";
+            $stmt = $pdo->prepare($sql_update_voluntario);
+            $stmt->bindParam(':oldCoordinador', $old_id_coordinador, PDO::PARAM_INT);
+            $stmt->execute();
         }
+
+        // 3. Actualizar el id_coordinador en Consejos
+        $sql_update_consejo = "UPDATE Consejos SET id_coordinador = :nuevoCoordinador WHERE region_id = :consejoId";
+        $stmt = $pdo->prepare($sql_update_consejo);
+        $stmt->bindParam(':nuevoCoordinador', $id_coordinador, PDO::PARAM_INT);
+        $stmt->bindParam(':consejoId', $id_consejo, PDO::PARAM_INT);
+        $resultado = $stmt->execute();
+
+        return $resultado ? true : false;
+    } catch (PDOException $e) {
+        return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
+    } finally {
+        $pdo = null;
     }
+}
+
     public static function ObtenerConsejos($id)
     {
         $regiones = [];  // Asegúrate de usar $regiones

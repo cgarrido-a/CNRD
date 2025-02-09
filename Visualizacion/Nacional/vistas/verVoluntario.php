@@ -20,8 +20,8 @@ if (!$idVoluntario) {
 $voluntario = Voluntarios::obtenerVoluntarioPorId($idVoluntario);
 $credencial = Usuario::get_cedusuario($idVoluntario);
 $idreg= $voluntario->obtener_region();
-$regiones = Usuario::ObtenerConsejos($idreg);
 
+$regiones = Usuario::ObtenerConsejos($idreg);
 if (!$voluntario) {
     mostrarError("No se encontraron datos para el voluntario especificado.");
     exit;
@@ -157,7 +157,7 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                         </select>
                     </h6>
                     <?php
-                     if($voluntario->obtener_TypeUser() == 'Coordinador'){
+                     if($voluntario->obtener_TypeUser() === 'Nacional'|| $voluntario->obtener_TypeUser() == 'Coordinador'){
                         echo ' <h6 id="SelectorConsejo"for="seleccionconsejo">Elegir consejo';
                      }else{
                         echo ' <h6 id="SelectorConsejo" hidden for="seleccionconsejo">Elegir consejo';
@@ -169,7 +169,7 @@ foreach (glob("../modales-vol/*.php") as $archivo) {
                                 
                                 <option value="<?php echo $region['region_id']; ?>"
                                     <?php echo ($region['id_coordinador'] == $voluntario->obtener_id()) ? 'selected' : ''; ?>>
-                                    <?php echo $region['nombre']; ?>
+                                    <?php echo $region['nombre'] . $region['id_coordinador']; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
