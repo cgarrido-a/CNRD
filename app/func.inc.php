@@ -4,6 +4,45 @@ include_once('conex.inc.php');
 include_once('class.inc.php');
 class Clinicas
 {
+    public static function guardar_clinica($nombreClinica, $tipo, $direccion, $id_region, $correo, $clave)
+{
+    try {
+        $pdo = Database::connect();
+        $contrasenaHashed = password_hash($clave, PASSWORD_BCRYPT);
+        
+        $query = "INSERT INTO ubicaciones (id_region, tipo, direccion, email, password, nombre) 
+                  VALUES (:id_region, :tipo, :direccion, :correo, :clave, :nombreClinica)";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':id_region', $id_region, PDO::PARAM_INT);
+        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_STR);
+        $stmt->bindParam(':direccion', $direccion, PDO::PARAM_STR);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->bindParam(':clave', $contrasenaHashed, PDO::PARAM_STR);
+        $stmt->bindParam(':nombreClinica', $nombreClinica, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        $nuevaClinicaId = $pdo->lastInsertId(); // Obtener el ID de la nueva clínica
+
+        return [
+            'success' => true,
+            'id' => $nuevaClinicaId,
+            'nombreClinica' => $nombreClinica,
+            'tipo' => $tipo,
+            'direccion' => $direccion,
+            'id_region' => $id_region,
+            'correo' => $correo
+        ];
+    } catch (PDOException $e) {
+        return [
+            'success' => false,
+            'message' => 'Error al agregar la clínica: ' . $e->getMessage()
+        ];
+    }
+}
+
+    
     public static function generarCadena($idClinica)
     {
         if (!is_numeric($idClinica) || $idClinica <= 0) {
@@ -63,7 +102,7 @@ class Clinicas
 
         try {
             // Consulta para buscar la clínica por id
-            $sql = "SELECT * FROM clinicas WHERE id = :id";
+            $sql = "SELECT * FROM ubicaciones WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -137,17 +176,12 @@ class Clinicas
     {
         $pdo = Database::connect();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+        $clinicas = [];
         try {
             // Definir la consulta según el nivel del usuario
-            if ($_SESSION['region'] === "Nacional") {
-                $sql = "SELECT * FROM clinicas";
-                $stmt = $pdo->prepare($sql);
-            } else {
-                $sql = "SELECT * FROM clinicas WHERE region = :region";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':region', $_SESSION['region'], PDO::PARAM_STR);
-            }
+            $sql = "SELECT * FROM ubicaciones";
+            $stmt = $pdo->prepare($sql);
+
 
             // Ejecutar la consulta
             $stmt->execute();
@@ -156,7 +190,7 @@ class Clinicas
             $clinicas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Retornar los datos codificados en JSON
-            return json_encode($clinicas);
+            return $clinicas;
         } catch (PDOException $e) {
             // Retornar un mensaje de error en JSON
             return json_encode(['error' => 'Error en la base de datos: ' . $e->getMessage()]);
@@ -172,6 +206,33 @@ class Clinicas
 
 class Usuario
 {
+    public static function agregarRegion($nombreRegion)
+    {
+        if (empty($nombreRegion)) {
+            return json_encode(['success' => false, 'message' => 'El nombre de la región es obligatorio']);
+        }
+
+        try {
+            $pdo = Database::connect();
+            $query = "INSERT INTO regiones (Region) VALUES (:nombre)";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':nombre', $nombreRegion, PDO::PARAM_STR);
+            $stmt->execute();
+
+            $nuevaRegionId = $pdo->lastInsertId(); // Obtener el ID de la nueva región
+
+            return json_encode([
+                'success' => true,
+                'id' => $nuevaRegionId,
+                'nombreRegion' => $nombreRegion
+            ]);
+        } catch (PDOException $e) {
+            return json_encode([
+                'success' => false,
+                'message' => 'Error al agregar la región: ' . $e->getMessage()
+            ]);
+        }
+    }
     public static function ActCon($id_consejo, $id_coordinador)
     {
         try {
@@ -181,15 +242,15 @@ class Usuario
             // Definir la consulta para actualizar el estado de habilitación
             $sql = "UPDATE consejos SET id_coordinador = :habilitacion WHERE id = :clinicaId";
             $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':habilitacion',$id_coordinador,PDO::PARAM_INT);
-            $stmt->bindParam(':clinicaId',$id_consejo,PDO::PARAM_INT);
+            $stmt->bindParam(':habilitacion', $id_coordinador, PDO::PARAM_INT);
+            $stmt->bindParam(':clinicaId', $id_consejo, PDO::PARAM_INT);
 
             // Ejecutar la consulta
-            $resultado =$stmt->execute();
-            if($resultado){
+            $resultado = $stmt->execute();
+            if ($resultado) {
                 return true;
-            }else {
-            return false;
+            } else {
+                return false;
             }
         } catch (PDOException $e) {
             return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
@@ -817,10 +878,6 @@ class Voluntarios
         // Retorna el arreglo organizado
         return $datos;
     }
-
-
-
-
 
     public static function ObtenerCertificados($id)
     {

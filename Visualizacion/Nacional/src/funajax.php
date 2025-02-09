@@ -11,6 +11,12 @@ if (!isset($_SESSION['user_type'])) {
     exit();
 }
 switch ($_POST['variable']) {
+    case 'AgReg':
+        if ($_POST['accion'] === 'agregarRegion') {
+            $nombreRegion = $_POST['nombreRegion'] ?? '';
+            echo Usuario::agregarRegion($nombreRegion);
+        }
+        break;
     case 'CamUs22':
         // Validar que los campos obligatorios estén presentes
         if (!isset($_POST['tipo'], $_POST['id'], $_POST['camp'], $_POST['valCam'], $_POST['val2'])) {

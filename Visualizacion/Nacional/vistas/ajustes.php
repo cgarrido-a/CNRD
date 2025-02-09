@@ -10,6 +10,7 @@ if (!isset($_SESSION['UserLog'])) {
     header('Location: login.html');
     exit();
 }
+$ruta = '';
 include '../plantillas/DecInc.inc.php';
 ?>
 
@@ -96,69 +97,14 @@ include '../plantillas/DecInc.inc.php';
                 <form id="formNuevaRegion">
                     <div class="mb-3">
                         <label class="form-label">Nombre de la Región:</label>
-                        <input type="text" class="form-control" name="nombreRegion" required>
+                        <input type="text" class="form-control" id="nombreRegion" required>
                     </div>
-                    <button type="submit" class="btn btn-success w-100">Guardar</button>
+                    <button type="button" id="enviarRegion" class="btn btn-success w-100">Guardar</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    $(document).ready(function() {
-        // Cargar las regiones desde PHP en una variable JS
-        let Regiones = <?php echo json_encode($listaDeRegiones); ?>; // Se obtiene desde PHP
-
-        // Llenar el select de regiones al cargar la página
-        CargarRegiones();
-
-        // Enviar nueva región por AJAX y agregarla dinámicamente
-        $('#formNuevaRegion').submit(function(e) {
-            e.preventDefault();
-            $.post('acciones.php', $(this).serialize() + '&accion=agregarRegion', function(response) {
-                let jsonResponse = JSON.parse(response);
-                
-                if (jsonResponse.success) {
-                    let nuevaRegion = {
-                        ID: jsonResponse.id, 
-                        nombre: jsonResponse.nombreRegion
-                    };
-
-                    // Agregar nueva región a la lista de regiones
-                    Regiones.push(nuevaRegion);
-
-                    // Agregar la nueva región al select de consejos
-                    let select = document.getElementById('SelectRegion');
-                    let option = document.createElement('option');
-                    option.value = nuevaRegion.ID;
-                    option.textContent = nuevaRegion.nombre;
-                    select.appendChild(option);
-
-                    // Resetear formulario
-                    $('#formNuevaRegion')[0].reset();
-
-                    // Cerrar modal
-                    $('#nuevaRegionModal').modal('hide');
-
-                    console.log("Nueva región agregada:", nuevaRegion);
-                }
-            });
-        });
-    });
-
-    function CargarRegiones() {
-        let select = document.getElementById('SelectRegion');
-        select.innerHTML = ''; // Limpiar antes de agregar opciones
-
-        Regiones.forEach(region => {
-            let option = document.createElement('option');
-            option.textContent = region.nombre;
-            option.value = region.ID;
-            select.appendChild(option);
-        });
-    }
-</script>
 
 
 <?php
