@@ -134,9 +134,9 @@ class Registroo
                 SET certificado_titulo = :certificadoTitulo, Fotoperfil = :fotoPerfil, certificadoAntecedentes = :certificadoAntecedentes 
                 WHERE id = :id";
                 $stmtActualizar = $pdo->prepare($sqlActualizar);
-                $stmtActualizar->bindValue(':certificadoTitulo', $archivosSubidos['certificadoTitulo'] ?? null);
-                $stmtActualizar->bindValue(':fotoPerfil', $archivosSubidos['fotoPerfil'] ?? null);
-                $stmtActualizar->bindValue(':certificadoAntecedentes', $archivosSubidos['certificadoAntecedentes'] ?? null);
+                $stmtActualizar->bindValue(':certificadoTitulo', '../../../'.$archivosSubidos['certificadoTitulo'] ?? null);
+                $stmtActualizar->bindValue(':fotoPerfil', '../../../'.$archivosSubidos['fotoPerfil'] ?? null);
+                $stmtActualizar->bindValue(':certificadoAntecedentes', '../../../'.$archivosSubidos['certificadoAntecedentes'] ?? null);
                 $stmtActualizar->bindValue(':id', $voluntarioId);
                 $stmtActualizar->execute();
 
